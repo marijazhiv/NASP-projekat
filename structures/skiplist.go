@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	maxl = 32
-	p    = 0.5
+	maxl = 32  //max visina skipliste
+	p    = 0.5 //faktor bacanja novcica
 )
 
 type Node struct {
-	v    uint32
-	item string
+	v    uint32 //hashirana vrednost node-a
+	item string //ime node-a
 	ls   []*Level
 }
 
@@ -27,7 +27,7 @@ type SkipLista struct {
 	c  int
 }
 
-func NewSkipList() *SkipLista {
+func NewSkipList() *SkipLista { //inicijalizacija skip liste
 	return &SkipLista{
 		hn: NewNode(maxl, "nil", 0),
 		h:  1,
@@ -35,7 +35,7 @@ func NewSkipList() *SkipLista {
 	}
 }
 
-func NewNode(level int, name string, val uint32) *Node {
+func NewNode(level int, name string, val uint32) *Node { //inicijalizacija jednog node-a
 	n := new(Node)
 	n.v = val
 	n.item = name
@@ -46,13 +46,13 @@ func NewNode(level int, name string, val uint32) *Node {
 	return n
 }
 
-func hash(s string) uint32 {
+func hash(s string) uint32 { //funkcija hashiranja stringa u uint32
 	h := fnv.New32a()
 	h.Write([]byte(s))
 	return h.Sum32()
 }
 
-func (sl *SkipLista) randomlvl() int {
+func (sl *SkipLista) randomlvl() int { //odredjivanje nivoa node-a bacanjem novcica
 	l := 1
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for r.Float64() < p && l < maxl {
