@@ -2,6 +2,9 @@ package structures
 
 import "fmt"
 
+// Jelena Adamovic, SV 6/2021
+
+// test za Memtable
 func MemTableTest() {
 	mt := NewMemTable(3, 3)
 	mt.AddNew("Jelena")
