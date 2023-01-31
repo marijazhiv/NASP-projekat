@@ -223,34 +223,34 @@ func (wal *Wal) ReadWal(path string) { //citanje WAL-a
 		fmt.Println(err)
 	}
 
-	err = file.Close()
+	err = file.Close() //zatvaramo trenutni file
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	bufferedReader := bufio.NewReader(file)
-	info, err := os.Stat(file.Name())
+	bufferedReader := bufio.NewReader(file) //pravimo buffer i ucitavamo podatke iz fajla
+	info, err := os.Stat(file.Name()) //podaci o file po imenu file.Name()
 
 	if err != nil {
 		fmt.Println(err)
 	}
-	num_of_bytes := info.Size()
+	num_of_bytes := info.Size() //proveravamo velicinu datoteke (velicina u bajtovima)
 
-	bytes := make([]byte, num_of_bytes)
+	bytes := make([]byte, num_of_bytes) //pravimo novu promenljivu tipa array byte, velicine koja je procitana iz file-a
 	_, err = bufferedReader.Read(bytes)
 
-	currentSegment := Segment{
+	currentSegment := Segment{ //trenutni segment, sve podatke inicijalno postavljamo na "nulu"
 		index:    index,
 		data:     nil,
 		size:     0,
 		capacity: SEGMENT_CAPACITY,
 	}
 
-	currentSegment.addData(bytes)
-	wal.currentSegment = &currentSegment
-	wal.segments = append(wal.segments, &currentSegment)
+	currentSegment.addData(bytes) //dodajemo podatke koje smo predhodno iscitali iz file-a
+	wal.currentSegment = &currentSegment //pokazivac "currentSegment" iz WAL-a postavljamo na trenutni segment koji smo kreirali par linija iznad
+	wal.segments = append(wal.segments, &currentSegment) //na listu segmenata koji se nalaze u WAL-u dodajemo i trenutni
 
-	err = file.Close()
+	err = file.Close() //zatvaramo file
 	if err != nil {
 		fmt.Println(err)
 	}
