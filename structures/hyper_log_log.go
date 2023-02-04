@@ -1,5 +1,7 @@
 package structures
 
+//Boris Markov SV73/2021
+
 import (
 	"encoding/binary"
 	"hash/fnv"
