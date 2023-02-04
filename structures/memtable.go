@@ -5,16 +5,16 @@ package structures
 type MemTable struct {
 	data    SkipLista
 	size    uint
-	border  uint
+	limit   uint
 	maxSize uint
 }
 
 // TODO: preuzimanje maksimalne velicine MemTable iz konfiguracionog fajla
 // Funkcija newMemTable pravi novi MemTable uz pomoc skip liste.
 // Border predstavlja granicu do koje mozemo napuniti MemTable pre ubacivanja u SSTable.
-func NewMemTable(maxSize, border uint) *MemTable {
+func NewMemTable(maxSize, limit uint) *MemTable {
 	sl := NewSkipList() // pravimo praznu skip listu
-	mt := MemTable{*sl, 0, border, maxSize}
+	mt := MemTable{*sl, 0, limit, maxSize}
 	return &mt
 }
 
@@ -75,14 +75,14 @@ func (mt *MemTable) Size() uint {
 
 // Funkcija proverava da li je MemTable dovoljno popunjen da bi se flush-ovao u SSTable.
 func (mt *MemTable) checkFlush() bool {
-	if (float64(mt.size)/float64(mt.maxSize))*100 >= float64(mt.border) {
+	if (float64(mt.size)/float64(mt.maxSize))*100 >= float64(mt.limit) {
 		return true
 	}
 	return false
 }
 
-// TODO: funkcija za flush-ovanje u SSTable
-//func (mt *MemTable) Flush() {
-//	filename := findSSTableFilename("1")
-//	CreateSSTable(*mt, filename)
-//}
+// funkcija za flush-ovanje u SSTable
+func (mt *MemTable) Flush() {
+	filename := findSSTableFilename("1")
+	CreateSStable(*mt, filename)
+}
