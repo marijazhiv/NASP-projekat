@@ -1,5 +1,7 @@
 package structures
 
+//Boris Markov SV/73-2021
+
 import (
 	"hash/fnv"
 	"math/rand"
@@ -12,9 +14,10 @@ const (
 )
 
 type Node struct {
-	v    uint32 //hashirana vrednost node-a
-	item string //ime node-a
-	ls   []*Level
+	v         uint32 //hashirana vrednost node-a
+	item      string //ime node-a
+	tombstone bool   //tombstone elemenat
+	ls        []*Level
 }
 
 type Level struct {
@@ -39,6 +42,7 @@ func NewNode(level int, name string, val uint32) *Node { //inicijalizacija jedno
 	n := new(Node)
 	n.v = val
 	n.item = name
+	n.tombstone = false
 	n.ls = make([]*Level, level)
 	for i := 0; i < len(n.ls); i++ {
 		n.ls[i] = new(Level)
@@ -72,7 +76,7 @@ func (sl *SkipLista) add(name string) bool {
 	update := make([]*Node, maxl)
 	th := sl.hn
 
-	for i := sl.h - 1; i >= 0; i-- {
+	for i := sl.h - 1; i >= 0; i-- { //generisemo mesta gde cemo ubaciti fajl
 		for th.ls[i].next != nil && th.ls[i].next.v < value {
 			th = th.ls[i].next
 		}
@@ -83,13 +87,13 @@ func (sl *SkipLista) add(name string) bool {
 		update[i] = th
 	}
 
-	level := sl.randomlvl()
+	level := sl.randomlvl() //generisemo nivo do kog ce node skociti
 	node := NewNode(level, name, value)
 	if level > sl.h {
 		sl.h = level
 	}
 
-	for i := 0; i < level; i++ {
+	for i := 0; i < level; i++ { //na svakom nivou (do generisanog) ga zapisujemo
 		if update[i] == nil {
 			sl.hn.ls[i].next = node
 			continue
@@ -121,8 +125,12 @@ func (sl *SkipLista) find(name string) (*Node, bool) {
 	if node == nil {
 		return nil, false
 	}
+	if node.tombstone == false { //provera da li je obrisan
+		return node, true
+	} else {
+		return nil, false
+	}
 
-	return node, true
 }
 
 func (sl *SkipLista) delete(name string) bool {
@@ -147,17 +155,18 @@ func (sl *SkipLista) delete(name string) bool {
 		return false
 	}
 
-	for i := 0; i < len(node.ls); i++ {
-		last[i].ls[i].next = node.ls[i].next
-		node.ls[i].next = nil
-	}
+	node.tombstone = true
+	// for i := 0; i < len(node.ls); i++ {
+	// 	last[i].ls[i].next = node.ls[i].next
+	// 	node.ls[i].next = nil
+	// }
 
-	for i := 0; i < len(sl.hn.ls); i++ {
-		if sl.hn.ls[i].next == nil {
-			sl.h = i
-			break
-		}
-	}
+	// for i := 0; i < len(sl.hn.ls); i++ {
+	// 	if sl.hn.ls[i].next == nil {
+	// 		sl.h = i
+	// 		break
+	// 	}
+	// }
 	sl.c--
 	return true
 }
