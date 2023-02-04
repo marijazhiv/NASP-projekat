@@ -60,6 +60,10 @@ func (mt *MemTable) Find(key string) (ok, deleted bool, value string) {
 		ok = false
 		deleted = false
 		value = ""
+	} else if node.tombstone {
+		ok = true
+		deleted = true
+		value = ""
 	} else {
 		ok = true
 		deleted = false
