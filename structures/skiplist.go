@@ -125,12 +125,8 @@ func (sl *SkipLista) find(name string) (*Node, bool) {
 	if node == nil {
 		return nil, false
 	}
-	if node.tombstone == false { //provera da li je obrisan
-		return node, true
-	} else {
-		return nil, false
-	}
 
+	return node, true
 }
 
 func (sl *SkipLista) delete(name string) bool {
