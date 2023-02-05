@@ -42,14 +42,18 @@ func unos() string {
 	return input.Text()
 }
 
-func list_func(choice int, struc *structures.Structures) bool { //ime promenljive nam se kosi sa imenom paketa
+func list_func(choice int, s *structures.Structures) bool {
 	if choice == 1 { //put
-		if struc.TOKEN_BUCKET.ValidateRequest() == true {
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
 			fmt.Print("Unesite kljuc podatka koji zelite da PUT-ujete -> ")
-			key := unos()
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := input_key.Text()
 			fmt.Print("Unesite vrednost podatka koji zelite da PUT-ujete -> ")
-			value := unos()
-			if struc.PUT(key, []byte(value), false) == true {
+			input_value := bufio.NewScanner(os.Stdin)
+			input_value.Scan()
+			value := input_value.Text()
+			if s.PUT(key, []byte(value), false) == true {
 				fmt.Println("PUT je uspesno zavrsen!")
 			} else {
 				fmt.Println("Nije moguce izvrsiti PUT!")
@@ -58,14 +62,33 @@ func list_func(choice int, struc *structures.Structures) bool { //ime promenljiv
 			fmt.Println("Previse zahteva je poslato!")
 		}
 	} else if choice == 2 { //get
-		if struc.TOKEN_BUCKET.ValidateRequest() == true {
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
+			fmt.Print("Unesite kljuc podatka koji pretrazujete -> ")
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := input_key.Text()
 
+			value := s.GET(key)
+			fmt.Println("Vrednost -> ", value)
 		} else {
-
+			fmt.Println("Previse zahteva je poslato!")
 		}
 	} else if choice == 3 { //delete
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
+			fmt.Print("Unesite kljuc podatka koji zelite da obrisete -> ")
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := input_key.Text()
 
-	} else if choice == 4 { //list
+			if s.DELETE(key) == true {
+				fmt.Println("Podataka je uspesno obrisan!")
+			} else {
+				fmt.Println("Nije moguce obrisati podatak sa zadatim kljucem. Ne postoji!")
+			}
+		} else {
+			fmt.Println("Previse zahteva je poslato!")
+		}
+	}  else if choice == 4 { //list
 
 	} else if choice == 5 { //range scan
 
@@ -83,20 +106,20 @@ func list_func(choice int, struc *structures.Structures) bool { //ime promenljiv
 		fmt.Println("\nKreiranje HyperLogLog-a")
 		fmt.Print("Kljuc HLL: ")
 		key := "hll-" + unos()
-		val := structures.NewHLL(uint(struc.CONFIG.HLL_Parameters.Precision))
+		val := structures.NewHLL(uint(s.CONFIG.HLL_Parameters.Precision))
 		hll := val.SerializeHLL()
-		if struc.PUT(key, hll, false) {
+		if s.PUT(key, hll, false) {
 			fmt.Println("HyperLogLog je uspesno kreiran.")
 		}
 	} else if choice == 10 { //add element to hll
-		if !check_tocken_bucket(struc) {
+		if !check_tocken_bucket(s) {
 			return true
 		}
 
 		fmt.Println("\n-Dodajemo na HyperLogLog")
 		fmt.Print("Kljuc HLL: ")
 		key := "hll-" + unos()
-		ok, hll := struc.Check_key(key)
+		ok, hll := s.Check_key(key)
 		if !ok {
 			fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
 		}
@@ -105,7 +128,7 @@ func list_func(choice int, struc *structures.Structures) bool { //ime promenljiv
 		fmt.Print(("Vrednost koju dodajemo: "))
 		val := unos()
 		hyperll.Add(val)
-		if struc.EDIT(key, hyperll.SerializeHLL()) {
+		if s.EDIT(key, hyperll.SerializeHLL()) {
 			fmt.Println("Uspesno dodat!")
 		} else {
 			fmt.Println("Neuspesno dodat!")
@@ -113,14 +136,14 @@ func list_func(choice int, struc *structures.Structures) bool { //ime promenljiv
 		return true
 
 	} else if choice == 11 { //calculate hll
-		if !check_tocken_bucket(struc) {
+		if !check_tocken_bucket(s) {
 			return true
 		}
 
 		fmt.Println("\n-Estimacija HLL")
 		fmt.Print("Kljuc HLL: ")
 		key := "hll-" + unos()
-		ok, hll := struc.Check_key(key)
+		ok, hll := s.Check_key(key)
 		if !ok {
 			fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
 		}
