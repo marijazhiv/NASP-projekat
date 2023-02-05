@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"naisp_projekat/structures"
+	"NASP-projekat/structures"
 	"os"
 	"strconv"
 	"strings"
