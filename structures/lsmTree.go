@@ -238,10 +238,9 @@ func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_D
 			first++
 		}
 	}
-	// TODO: skini komentare
-	//index := CreateIndex(keys, offset, table.indexFilename)
-	//keysIndex, offset := Index.Write()
-	//WriteSummary(keysIndex, offsets, table.summaryFilename)
+	index := CreateIndex(keys, offset, table.indexFilename)
+	keysIndex, offsets := index.Write()
+	WriteSummary(keysIndex, offsets, table.summaryFilename)
 	table.WriteTOC()
 	Write_BloomFilter(table.filterFilename, filter)
 	Create_Merkle(level, new_Data.Name(), values)
