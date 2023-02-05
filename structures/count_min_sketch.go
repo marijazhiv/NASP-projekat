@@ -18,8 +18,8 @@ type CountMinSketch struct {
 	E          float64       // procena ucestalosti dogadjaja
 	D          float64       // d = ln (1/delta), tacnost koju celimo da postignemo u pronalazenju ucestalosti
 	Set        [][]int       //set koji sadrzi bitove
-	hash       []hash.Hash32 // hash
-	time_const uint
+	Hash       []hash.Hash32 // hash
+	Time_const uint
 }
 
 func Create_CountMinSketch(p float64, d float64) *CountMinSketch {
@@ -66,7 +66,7 @@ func Create_Hash_CMS(k uint) ([]hash.Hash32, uint) {
 func (count_min_sketch *CountMinSketch) Add_Element_CMS(elem string) {
 	//dodajemo element na trenutan count_min_sketch tako sto:
 	//elem propustamo kroz svaku hash funkciju hi = {1,2...k}
-	for i, hash_func := range count_min_sketch.hash {
+	for i, hash_func := range count_min_sketch.Hash {
 		j := HashIt_CMS(hash_func, elem, count_min_sketch.M) // j = hi(elem) % m
 		count_min_sketch.Set[i][j] += 1                      //na preseku reda i kolone vrednost povecavamo za 1
 	}
@@ -75,7 +75,7 @@ func (count_min_sketch *CountMinSketch) Add_Element_CMS(elem string) {
 func (count_min_sketch *CountMinSketch) Query_CMS(elem string) int {
 	//Nalazimo minimum iz niza koji smo napravili pustajuci *elem* kroz svaku hash funkciju
 	values := make([]int, count_min_sketch.K, count_min_sketch.K) //values je niz, sadrzi sve vrednosti koje dobijemo kada *elem* propustimo kroz sve hash-eve, duzine je k -> *broj hash funkcija*
-	for i, hash_func := range count_min_sketch.hash {             //za svaku hash funkciju
+	for i, hash_func := range count_min_sketch.Hash {             //za svaku hash funkciju
 		j := HashIt_CMS(hash_func, elem, count_min_sketch.M)
 		values[i] = count_min_sketch.Set[i][j] //upisujemo vrednost koja se nalazi na toj poziciji u cms-u
 	}
@@ -117,6 +117,6 @@ func Deserialize_CMS(data []byte) *CountMinSketch {
 			break
 		}
 	}
-	count_min_sketch.hash = CopyHashFunctions(count_min_sketch.K, count_min_sketch.time_const)
+	count_min_sketch.Hash = Copy_Hash(count_min_sketch.K, count_min_sketch.Time_const)
 	return count_min_sketch //povratna vrednost je count_min_sketch objekat
 }
