@@ -12,16 +12,16 @@ import (
 )
 
 type hyperLogLog struct {
-	registers []int //niz baketa
-	m         uint  //broj baketa
-	p         uint  //preciznost
+	Registers []int //niz baketa
+	M         uint  //broj baketa
+	P         uint  //preciznost
 }
 
 func NewHLL(m uint) hyperLogLog { //inicijalizacija
 	return hyperLogLog{
-		registers: make([]int, m),
-		m:         m,
-		p:         uint(math.Ceil(math.Log2(float64(m)))),
+		Registers: make([]int, m),
+		M:         m,
+		P:         uint(math.Ceil(math.Log2(float64(m)))),
 	}
 }
 
@@ -36,18 +36,18 @@ func (h hyperLogLog) Add(data string) hyperLogLog {
 	b := make([]byte, 4)           //ubacujemo ga u 4 bajta
 	binary.LittleEndian.PutUint32(b, dummy)
 	x := CreateHash32(b)
-	k := 32 - h.p                    //prvih b bita (zavisi od preciznosti)
-	r := LeftmostActiveBit(x << h.p) //gledamo koliko nula imamo sa kraja
+	k := 32 - h.P                    //prvih b bita (zavisi od preciznosti)
+	r := LeftmostActiveBit(x << h.P) //gledamo koliko nula imamo sa kraja
 	j := x >> uint(k)
-	if r > h.registers[j] { //dodeljujemo broj pojavljivanja nula registru koji je odredjen prvim p bita
-		h.registers[j] = r
+	if r > h.Registers[j] { //dodeljujemo broj pojavljivanja nula registru koji je odredjen prvim p bita
+		h.Registers[j] = r
 	}
 	return h
 }
 
 func (hll *hyperLogLog) EmptyCount() int {
 	sum := 0
-	for _, val := range hll.registers {
+	for _, val := range hll.Registers {
 		if val == 0 {
 			sum++
 		}
@@ -57,16 +57,16 @@ func (hll *hyperLogLog) EmptyCount() int {
 
 func (h hyperLogLog) Count() uint64 { //racuna evaluaciju HLL
 	sum := 0.
-	for _, v := range h.registers {
+	for _, v := range h.Registers {
 		sum += math.Pow(math.Pow(2, float64(v)), -1)
 	}
 
-	alpha := 0.7213 / (1.0 + 1.079/float64(h.m))
-	estimation := alpha * math.Pow(float64(h.m), 2.0) / sum
+	alpha := 0.7213 / (1.0 + 1.079/float64(h.M))
+	estimation := alpha * math.Pow(float64(h.M), 2.0) / sum
 	emptyRegs := h.EmptyCount()
-	if estimation <= 2.5*float64(h.m) { //do small range correction
+	if estimation <= 2.5*float64(h.M) { //do small range correction
 		if emptyRegs > 0 {
-			estimation = float64(h.m) * math.Log(float64(h.m)/float64(emptyRegs))
+			estimation = float64(h.M) * math.Log(float64(h.M)/float64(emptyRegs))
 		}
 	} else if estimation > 1/30.0*math.Pow(2.0, 32.0) { //do large range correction
 		estimation = -math.Pow(2.0, 32.0) * math.Log(1.0-estimation/math.Pow(2.0, 32.0))

@@ -32,7 +32,7 @@ func CreateSStable(data MemTable, filename string) (table *SSTable) {
 	table = &SSTable{generalFilename, generalFilename + "Data.db", generalFilename + "Index.db",
 		generalFilename + "Summary.db", generalFilename + "Filter.gob"}
 	//n i p po njima se racuna m i k
-	filter := Create_BloomFilter(data.Size(), 2) //bloomfilter za skup kljuceva  //ocekivana velicina podataka, vrednost false-positive verovatnoce koju dopustamo u sistemu; p=2
+	filter := CreateBloomFilter(data.Size(), 2) //bloomfilter za skup kljuceva  //ocekivana velicina podataka, vrednost false-positive verovatnoce koju dopustamo u sistemu; p=2
 	keys := make([]string, 0)
 	offset := make([]uint, 0) //pozicija u sstable-u
 	values := make([][]byte, 0)
@@ -67,7 +67,7 @@ func CreateSStable(data MemTable, filename string) (table *SSTable) {
 		offset = append(offset, currentOffset)
 		values = append(values, value)
 
-		filter.Add_Element_BF(*node) //dodaje sve elemente u filter
+		filter.Add(*node) //dodaje sve elemente u filter
 		//crc
 		crc := CRC32(value) //vraca string duzine 8 (to je tekstualni prikaz hexdec vrednosti 32-bitnog binarnog niza)
 		crcBytes := make([]byte, 4)
@@ -143,7 +143,7 @@ func CreateSStable(data MemTable, filename string) (table *SSTable) {
 	index := CreateIndex(keys, offset, table.indexFilename)
 	keys, offsets := index.Write()
 	WriteSummary(keys, offsets, table.summaryFilename)
-	Write_BloomFilter(table.filterFilename, filter)
+	writeBloomFilter(table.filterFilename, filter)
 	CreateMerkleTree(values, strings.ReplaceAll(table.SSTableFilename, "data/sstable/", ""))
 	table.WriteTOC()
 
@@ -312,9 +312,9 @@ func readSSTable(filename, level string) (table *SSTable) {
 func (st *SSTable) SSTableQuery(key string) (nadjen bool, value []byte, timestamp string) {
 	nadjen = false
 	value = nil
-	bf := Read_BloomFilter(st.filterFilename)
-	nadjen = bf.Query_BF(key) //da li je kljuc mozda nadjen ili sigurno ne  //ovo trazi kljuc u BloomFilteru
-	if nadjen {               //ako je mozda prisutan u bf
+	bf := readBloomFilter(st.filterFilename)
+	nadjen = bf.Query(key) //da li je kljuc mozda nadjen ili sigurno ne  //ovo trazi kljuc u BloomFilteru
+	if nadjen {            //ako je mozda prisutan u bf
 		nadjen, offset := FindSummary(key, st.summaryFilename) //onda trazimo u summary
 		if nadjen {
 			nadjen, offset = FindIndex(key, offset, st.indexFilename) //ako cuva vrednot u indexu

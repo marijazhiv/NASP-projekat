@@ -1,4 +1,4 @@
-//Dusica Trbovic, SV 42/2021
+// Dusica Trbovic, SV 42/2021
 package structures
 
 import (
@@ -117,6 +117,6 @@ func Deserialize_CMS(data []byte) *CountMinSketch {
 			break
 		}
 	}
-	count_min_sketch.hash = Copy_Hash(count_min_sketch.K, count_min_sketch.time_const)
+	count_min_sketch.hash = CopyHashFunctions(count_min_sketch.K, count_min_sketch.time_const)
 	return count_min_sketch //povratna vrednost je count_min_sketch objekat
 }

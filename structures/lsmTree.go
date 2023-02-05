@@ -120,7 +120,7 @@ func mergeFiles(dir, fD_File, fI_File, fS_File, fT_File, fF_File, sD_File, sI_Fi
 // Citanje i upis
 func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_Data, fData_File, sData_File *os.File, file_Length1, file_Length2 uint64, table *SSTable, level int) uint64 {
 
-	filter := Create_BloomFilter(uint(file_Length1+file_Length2), 2)
+	filter := CreateBloomFilter(uint(file_Length1+file_Length2), 2)
 
 	keys := make([]string, 0)
 	offset := make([]uint, 0)
@@ -145,7 +145,7 @@ func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_D
 					offset = append(offset, current_offset)
 					current_offset = Write_Data(new_Data, current_offset, crc1, timeStamp1,
 						tombStone1, keyLength1, valueLength1, key1, value1)
-					filter.Add_Element_BF(Element{key1, nil, nil, timeStamp1, false, 0})
+					filter.Add(Element{key1, nil, nil, timeStamp1, false, 0})
 					keys = append(keys, key1)
 					values = append(values, []byte(value1))
 
@@ -155,7 +155,7 @@ func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_D
 					offset = append(offset, current_offset)
 					current_offset = Write_Data(new_Data, current_offset, crc2, timeStamp2, tombStone2,
 						keyLength2, valueLength2, key2, value2)
-					filter.Add_Element_BF(Element{key2, nil, nil, timeStamp2, false, 0})
+					filter.Add(Element{key2, nil, nil, timeStamp2, false, 0})
 					keys = append(keys, key2)
 					values = append(values, []byte(value2))
 
@@ -178,7 +178,7 @@ func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_D
 				offset = append(offset, current_offset)
 				current_offset = Write_Data(new_Data, current_offset, crc1, timeStamp1, tombStone1,
 					keyLength1, valueLength1, key1, value1)
-				filter.Add_Element_BF(Element{key1, nil, nil, timeStamp1, false, 0})
+				filter.Add(Element{key1, nil, nil, timeStamp1, false, 0})
 				keys = append(keys, key1)
 				values = append(values, []byte(value1))
 
@@ -193,7 +193,7 @@ func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_D
 				offset = append(offset, current_offset)
 				current_offset = Write_Data(new_Data, current_offset, crc2, timeStamp2,
 					tombStone2, keyLength2, valueLength2, key2, value2)
-				filter.Add_Element_BF(Element{key2, nil, nil, timeStamp2, false, 0})
+				filter.Add(Element{key2, nil, nil, timeStamp2, false, 0})
 				keys = append(keys, key2)
 				values = append(values, []byte(value2))
 
@@ -211,7 +211,7 @@ func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_D
 				offset = append(offset, current_offset)
 				current_offset = Write_Data(new_Data, current_offset, crc2, timeStamp2, tombStone2,
 					keyLength2, valueLength2, key2, value2)
-				filter.Add_Element_BF(Element{key2, nil, nil, timeStamp2, false, 0})
+				filter.Add(Element{key2, nil, nil, timeStamp2, false, 0})
 				keys = append(keys, key2)
 				values = append(values, []byte(value2))
 			}
@@ -227,7 +227,7 @@ func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_D
 				offset = append(offset, current_offset)
 				current_offset = Write_Data(new_Data, current_offset, crc1, timeStamp1,
 					tombStone1, keyLength1, valueLength1, key1, value1)
-				filter.Add_Element_BF(Element{key1, nil, nil, timeStamp1, false, 0})
+				filter.Add(Element{key1, nil, nil, timeStamp1, false, 0})
 				keys = append(keys, key1)
 				values = append(values, []byte(value2))
 			}
@@ -242,7 +242,7 @@ func Read_And_Write(current_offset, current_offset1, current_offset2 uint, new_D
 	keysIndex, offsets := index.Write()
 	WriteSummary(keysIndex, offsets, table.summaryFilename)
 	table.WriteTOC()
-	Write_BloomFilter(table.filterFilename, filter)
+	writeBloomFilter(table.filterFilename, filter)
 	Create_Merkle(level, new_Data.Name(), values)
 
 	return uint64(len(keys))

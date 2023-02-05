@@ -1,9 +1,9 @@
 package main
 
 import (
+	"NASP-projekat/structures"
 	"bufio"
 	"fmt"
-	"NASP-projekat/structures"
 	"os"
 	"strconv"
 	"strings"
@@ -139,7 +139,7 @@ func list_func(choice int, s *structures.Structures) bool {
 			fmt.Println("Previse zahteva je poslato!")
 		}
 	} else if choice == 9 { //create hll
-		if s.TOKEN_BUCKET.ValidateRequest() == false {
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
 			fmt.Println("\nKreiranje HyperLogLog-a")
 			fmt.Print("Kljuc HLL: ")
 			input_key := bufio.NewScanner(os.Stdin)
@@ -154,7 +154,7 @@ func list_func(choice int, s *structures.Structures) bool {
 			fmt.Println("Previse zahteva je poslato!")
 		}
 	} else if choice == 10 { //add element to hll
-		if s.TOKEN_BUCKET.ValidateRequest() == false {
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
 			fmt.Println("\n-Dodajemo na HyperLogLog")
 			fmt.Print("Kljuc HLL: ")
 			input_key := bufio.NewScanner(os.Stdin)
@@ -163,6 +163,7 @@ func list_func(choice int, s *structures.Structures) bool {
 			ok, hll := s.Check_key(key)
 			if !ok {
 				fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
+				return true
 			}
 
 			hyperll := structures.DeserializeHLL(hll)
@@ -182,7 +183,7 @@ func list_func(choice int, s *structures.Structures) bool {
 		}
 
 	} else if choice == 11 { //calculate hll
-		if s.TOKEN_BUCKET.ValidateRequest() == false {
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
 			fmt.Println("\n-Estimacija HLL")
 			fmt.Print("Kljuc HLL: ")
 			input_key := bufio.NewScanner(os.Stdin)
@@ -191,6 +192,7 @@ func list_func(choice int, s *structures.Structures) bool {
 			ok, hll := s.Check_key(key)
 			if !ok {
 				fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
+				return true
 			}
 
 			hyperll := structures.DeserializeHLL(hll)
