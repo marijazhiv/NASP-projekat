@@ -88,7 +88,7 @@ func list_func(choice int, s *structures.Structures) bool {
 		} else {
 			fmt.Println("Previse zahteva je poslato!")
 		}
-	}  else if choice == 4 { //list
+	} else if choice == 4 { //list
 
 	} else if choice == 5 { //range scan
 
@@ -99,7 +99,7 @@ func list_func(choice int, s *structures.Structures) bool {
 	} else if choice == 8 { //query cms
 
 	} else if choice == 9 { //create hll
-		if !check_tocken_bucket(struc) {
+		if !check_tocken_bucket(s) {
 			return true
 		}
 
@@ -153,7 +153,7 @@ func list_func(choice int, s *structures.Structures) bool {
 		return true
 
 	} else if choice == 12 {
-		struc.WAL.Dump()
+		s.WAL.Dump()
 		fmt.Println("Izlazak iz programa!")
 		return false
 	}
