@@ -7,17 +7,17 @@ import "time"
 type TokenBucket struct {
 	capacity            int   // maksimalan broj tokena koji mozemo smestiti u Token Bucket
 	currentTokens       int   // trenutan broj tokena koji se nalaze u Token Bucket-u
-	rate                int64 // vreme koje je potrebno da bi se bucket napunio (u sekundama)
+	interval            int64 // vreme koje je potrebno da bi se bucket napunio (u sekundama)
 	lastRefillTimestamp int64 // vreme poslednjeg punjenja u sekundama
 }
 
 // Funkcija NewTokenBucket kreira novi prazan Token Bucket.
 // Kapacitet TokenBucket-a preuzimamo iz konfiguracionog fajla.
-func NewTokenBucket(rate int64, maximumTokens int) *TokenBucket {
+func NewTokenBucket(interval int64, maximumTokens int) *TokenBucket {
 	return &TokenBucket{
 		capacity:            maximumTokens,
 		currentTokens:       maximumTokens,
-		rate:                rate,
+		interval:            interval,
 		lastRefillTimestamp: time.Now().Unix(),
 	}
 }
@@ -32,7 +32,7 @@ func NewTokenBucket(rate int64, maximumTokens int) *TokenBucket {
 // i definisemo novo vreme resetovanja
 
 func (tb *TokenBucket) validateRequest() bool {
-	if time.Now().Unix()-tb.lastRefillTimestamp > tb.rate {
+	if time.Now().Unix()-tb.lastRefillTimestamp > tb.interval {
 		tb.lastRefillTimestamp = time.Now().Unix()
 		tb.currentTokens = tb.capacity
 	}
