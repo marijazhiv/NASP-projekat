@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"NASP-projekat/structures"
 	"os"
 	"strconv"
 )
@@ -26,7 +27,16 @@ func list_meni() {
 	fmt.Println("Izaberite jednu od ponudjenih opcija iz menija -> ")
 }
 
-func list_func(choice int) bool {
+func check_tocken_bucket(s *structures.Structures) bool {
+	r := s.TOKEN_BUCKET.validateRequest()
+	if r == false {
+		fmt.Println("Previse zahteva je poslato!")
+		return false
+	}
+	return true
+}
+
+func list_func(choice int, structures *structures.Structures) bool {
 	if choice == 1 { //put
 
 	} else if choice == 2 { //get
@@ -50,6 +60,7 @@ func list_func(choice int) bool {
 	} else if choice == 11 { //calculate hll
 
 	} else if choice == 12 {
+		structures.WAL.Dump()
 		fmt.Println("Izlazak iz programa!")
 		return false
 	}
@@ -58,6 +69,9 @@ func list_func(choice int) bool {
 }
 
 func main() {
+	structures := new(structures.Structures)
+	structures.Init()
+
 	p := false
 	choice := 0
 	for p == false { //ponavlja se sve dok input ne bude validan, *broj i u dobrom opsegu*
@@ -83,7 +97,7 @@ func main() {
 	for q == true { //sve dok se ne pozove kraj programa, tj 12
 		fmt.Println(choice)
 		//pozivamo funkciju koja izlistava pozive, od 1-12
-		q = list_func(choice)
+		q = list_func(choice, structures)
 	}
 
 }
