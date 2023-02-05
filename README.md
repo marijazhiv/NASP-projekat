@@ -1,8 +1,8 @@
 # Key-Value engine
 
-predmet: Napredni algoritmi i strukture podataka
+- Predmet: Napredni algoritmi i strukture podataka
+- Grupa 14
 
-  (grupa 14)
 ## Članovi grupe
 
 Boris Markov, SV73/2021
