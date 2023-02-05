@@ -1,4 +1,5 @@
-package strukture
+//Dusica Trbovic, SV 42/2021
+package structures
 
 import (
 	"fmt"
