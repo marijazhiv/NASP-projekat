@@ -24,6 +24,7 @@ type Token_Bucket_Config struct {
 }
 
 type Mem_Table_Config struct {
+	Type                 int `json:"type"`
 	Skip_List_Max_Height int `json:"skip_list_max_height"`
 	Max_Size             int `json:"max_size"`
 	Limit                int `json:"limit"`
@@ -92,6 +93,9 @@ func Get_Configurations() (config *Config) {
 	if config.MemTable_Parameters.Skip_List_Max_Height == -1 {
 		config.MemTable_Parameters.Skip_List_Max_Height = 5
 	}
+	if config.MemTable_Parameters.Type == -1 {
+		config.MemTable_Parameters.Type = 1 //1 SL, 2 B Tree
+	}
 
 	if config.HLL_Parameters.Precision == -1 {
 		config.HLL_Parameters.Precision = 4
@@ -122,6 +126,7 @@ func Create_Configurations_File() {
 
 	config.MemTable_Parameters.Limit = -1
 	config.MemTable_Parameters.Max_Size = -1
+	config.MemTable_Parameters.Type = -1
 	config.MemTable_Parameters.Skip_List_Max_Height = -1
 
 	config.HLL_Parameters.Precision = -1
