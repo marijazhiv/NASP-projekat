@@ -26,16 +26,18 @@ type Level struct {
 }
 
 type SkipLista struct {
-	hn *Node
-	h  int
-	c  int
+	maxl int
+	hn   *Node
+	h    int
+	c    int
 }
 
 func NewSkipList(maxh int) *SkipLista { //inicijalizacija skip liste
 	return &SkipLista{
-		hn: NewNode(maxh, "nil", 0),
-		h:  1,
-		c:  0,
+		maxl: maxh,
+		hn:   NewNode(maxh, "nil", 0),
+		h:    1,
+		c:    0,
 	}
 }
 
@@ -61,7 +63,7 @@ func HashSL(s string) uint32 { //funkcija hashiranja stringa u uint32
 func (sl *SkipLista) randomlvl() int { //odredjivanje nivoa node-a bacanjem novcica
 	l := 1
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for r.Float64() < p && l < maxl {
+	for r.Float64() < p && l < sl.maxl {
 		l++
 	}
 	return l
@@ -75,7 +77,7 @@ func (sl *SkipLista) add(name string) bool {
 		return false
 	}
 
-	update := make([]*Node, maxl)
+	update := make([]*Node, sl.maxl)
 	th := sl.hn
 
 	for i := sl.h - 1; i >= 0; i-- { //generisemo mesta gde cemo ubaciti fajl
