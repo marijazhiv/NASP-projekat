@@ -189,28 +189,31 @@ func Insert(tree *BTreeNode, el *BTreeElement) {
 			middle := int64(node.m / 2)
 			novi_el := node.array[middle]
 			parent := node.parent
-			if int64(len(parent.array)) < node.m-1 {
-				parent.array = append(parent.array, parent.array[middle])
+			if int64(len(node.array)) < node.m-1 { //premestis klasika                                   //dodati ev cvor.m-1
+				node.array = append(node.array, node.array[middle])
 				parent.currentSize++
-				Sort(parent.array)
-				podniz := node.array[int(middle+1):]
+				Sort(parent.array) //oca
+				podniz := parent.array[int(middle+1):]
 				node.array = node.array[:middle]
+				//podniz := cvor.niz[int(srednji+1):]
 				d := make([]*BTreeNode, global)
-				child1 := BTreeNode{tree.m, int64(len(podniz)), podniz, d, parent}
+				dete1 := BTreeNode{tree.m, int64(len(podniz)), podniz, d, parent}
 				poz := 0
 				poz = poz + 1
-				counter1 := 0
+				//sad ide pomeranje u ocu niz cvorova da bi radilo reference i to
+				brojac1 := 0
 				for i := 0; i < int(len(parent.array)); i++ {
 					if el.key < parent.array[i].key {
 						poz = i
-						counter1++
+						brojac1++
 						break
 					}
 				}
-				if counter1 == 0 {
+				if brojac1 == 0 {
 					poz++
 				}
-				parent.children = append(parent.children, &child1)
+				parent.children = append(parent.children, &dete1)
+				//parent.children = append(parent.children, &child1)
 				for i := int(len(parent.children) - 2); i > poz-1; i-- {
 					pom := parent.children[i]
 					parent.children[i] = parent.children[i+1]
