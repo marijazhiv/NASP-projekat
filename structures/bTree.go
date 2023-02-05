@@ -17,6 +17,25 @@ type BTreeNode struct {
 	parent      *BTreeNode
 }
 
+func CreateBTree(m int64) *BTreeNode {
+	niz := make([]*BTreeElement, global)
+	d := make([]*BTreeNode, global)
+	koren := BTreeNode{m, 0, niz, d, nil}
+	return &koren
+}
+
+func Sort(niz []*BTreeElement) {
+	for i := 0; i < int(len(niz)-1); i++ {
+		for j := i + 1; j < int(len(niz)); j++ {
+			if (niz[j]).key < (niz[i]).key {
+				pom := niz[j]
+				niz[j] = niz[i]
+				niz[i] = pom
+			}
+		}
+	}
+}
+
 func Layout(tree *BTreeNode) []*BTreeElement {
 	array := make([]*BTreeElement, 0)
 	nodes := make([]*BTreeNode, 0)
@@ -37,17 +56,6 @@ func Layout(tree *BTreeNode) []*BTreeElement {
 	}
 	return array
 }
-func Sort(niz []*BTreeElement) {
-	for i := 0; i < int(len(niz)-1); i++ {
-		for j := i + 1; j < int(len(niz)); j++ {
-			if (niz[j]).key < (niz[i]).key {
-				pom := niz[j]
-				niz[j] = niz[i]
-				niz[i] = pom
-			}
-		}
-	}
-}
 func findTheBiggestHalfFull(node *BTreeNode) *BTreeNode {
 	parent := node.parent
 	if parent == nil {
@@ -64,13 +72,14 @@ func Wipe(tree *BTreeNode, el *BTreeElement) {
 	for len(node.array) > 0 {
 		for i := 0; i < len(node.array); i++ {
 			counter = 0
-			if node.array[i] == el {
-				node.array[i].flag = true
-				return
-			}
+
 			if node.array[i].key > el.key {
 				counter++
 				node = node.children[i]
+			}
+			if node.array[i] == el {
+				node.array[i].flag = true
+				return
 			}
 		}
 		if counter == 0 {
@@ -86,22 +95,24 @@ func Search(tree *BTreeNode, el *BTreeElement) bool {
 	}
 	if len(node.children) == 0 {
 		for i := 0; i < int(tree.currentSize); i++ {
-			if node.array[i] == el && node.array[i].flag == false {
-				return true
-			}
 			if node.array[i] == el && node.array[i].flag == true {
 				return false
 			}
+			if node.array[i] == el && node.array[i].flag == false {
+				return true
+			}
+
 		}
 	}
 	for len(node.children) != 0 {
 		for i := 0; i < len(node.array); i++ {
-			if node.array[i] == el {
-				return true
-			}
 			if node.array[i].key > el.key {
 				node = node.children[i]
 			}
+			if node.array[i] == el {
+				return true
+			}
+
 		}
 	}
 	return correct
@@ -109,14 +120,14 @@ func Search(tree *BTreeNode, el *BTreeElement) bool {
 func FindLeaf(tree *BTreeNode, el *BTreeElement) *BTreeNode {
 	node := tree
 	for len(node.children) > 0 {
-		brojac := 0
+		counter := 0
 		for i := 0; i < len(node.array); i++ {
-			if node.array[i].key > el.key && brojac == 0 {
+			if node.array[i].key > el.key && counter == 0 {
 				node = node.children[i]
-				brojac++
+				counter++
 			}
 		}
-		if brojac == 0 {
+		if counter == 0 {
 			node = node.children[len(node.array)]
 		}
 	}
@@ -128,14 +139,14 @@ func Insert(tree *BTreeNode, el *BTreeElement) {
 		tree.array = append(tree.array, el)
 		Sort(tree.array)
 		middle := int64(tree.m / 2)
-		podniz1 := tree.array[0:middle]
-		podniz2 := tree.array[middle+1:]
-		srednjiEl := tree.array[middle]
+		subarr1 := tree.array[0:middle]
+		subarr2 := tree.array[middle+1:]
+		midEl := tree.array[middle]
 		tree.array = nil
-		tree.array = append(tree.array, srednjiEl)
+		tree.array = append(tree.array, midEl)
 		d := make([]*BTreeNode, global)
-		child1 := BTreeNode{tree.m, int64(len(podniz1)), podniz1, d, tree}
-		child2 := BTreeNode{tree.m, int64(len(podniz2)), podniz2, d, tree}
+		child1 := BTreeNode{tree.m, int64(len(subarr1)), subarr1, d, tree}
+		child2 := BTreeNode{tree.m, int64(len(subarr2)), subarr2, d, tree}
 		tree.currentSize = 1
 		tree.children = append(tree.children, &child1)
 		tree.children = append(tree.children, &child2)
@@ -202,10 +213,10 @@ func Insert(tree *BTreeNode, el *BTreeElement) {
 						parent.array = append(parent.array, nodeStart.array[middle])
 						parent.currentSize++
 						Sort(parent.array)
-						podniz := nodeStart.array[middle+1:]
+						subarr := nodeStart.array[middle+1:]
 						nodeStart.array = nodeStart.array[:middle]
 						d := make([]*BTreeNode, global)
-						child1 := BTreeNode{tree.m, int64(len(podniz)), podniz, d, parent}
+						child1 := BTreeNode{tree.m, int64(len(subarr)), subarr, d, parent}
 						poz := 0
 						parent.children = append(parent.children, &child1)
 						change := false
@@ -318,47 +329,41 @@ func Insert(tree *BTreeNode, el *BTreeElement) {
 						}
 						nodeStart = nodeStart.parent
 					}
-					srednji := int64(nodeStart.m / 2)
-					p := nodeStart.array[srednji]
-					levoNiz := nodeStart.array[:srednji]
-					desnoNiz := nodeStart.array[srednji+1:]
-					podniz := make([]*BTreeElement, 0)
-					podniz = append(podniz, p)
+					middle := int64(nodeStart.m / 2)
+					p := nodeStart.array[middle]
+					leftArr := nodeStart.array[:middle]
+					rightArr := nodeStart.array[middle+1:]
+					subArr := make([]*BTreeElement, 0)
+					subArr = append(subArr, p)
 					d := make([]*BTreeNode, global)
 					l1 := make([]*BTreeNode, 0)
-					d1 := make([]*BTreeNode, 0)
+					r1 := make([]*BTreeNode, 0)
 					for i := 0; i < int(len(nodeStart.array)+1); i++ {
-						if i <= int(srednji) {
+						if i <= int(middle) {
 							l1 = append(l1, nodeStart.children[i])
 						} else {
-							d1 = append(d1, nodeStart.children[i])
+							r1 = append(r1, nodeStart.children[i])
 						}
 					}
 					Sort(nodeStart.array)
-					novi_Koren := BTreeNode{tree.m, int64(1), podniz, d, nil}
-					Levo := BTreeNode{node.m, int64(len(levoNiz)), levoNiz, l1, &novi_Koren}
-					Desno := BTreeNode{tree.m, int64(len(desnoNiz)), desnoNiz, d1, &novi_Koren}
-					novi_Koren.children = append(novi_Koren.children, &Levo)
-					novi_Koren.children = append(novi_Koren.children, &Desno)
+					new_Root := BTreeNode{tree.m, int64(1), subArr, d, nil}
+					Left := BTreeNode{node.m, int64(len(leftArr)), leftArr, l1, &new_Root}
+					Right := BTreeNode{tree.m, int64(len(rightArr)), rightArr, r1, &new_Root}
+					new_Root.children = append(new_Root.children, &Left)
+					new_Root.children = append(new_Root.children, &Right)
 					for i := 0; i < int(len(l1)); i++ {
-						l1[i].parent = &Levo
+						l1[i].parent = &Left
 					}
-					for i := 0; i < int(len(d1)); i++ {
-						(d1[i]) = &Desno
+					for i := 0; i < int(len(r1)); i++ {
+						(r1[i]) = &Right
 					}
-					tree.m = novi_Koren.m
-					tree.array = novi_Koren.array
-					tree.parent = novi_Koren.parent
-					tree.children = novi_Koren.children
-					tree.currentSize = novi_Koren.currentSize
+					tree.m = new_Root.m
+					tree.array = new_Root.array
+					tree.parent = new_Root.parent
+					tree.children = new_Root.children
+					tree.currentSize = new_Root.currentSize
 				}
 			}
 		}
 	}
-}
-func CreateB(m int64) *BTreeNode {
-	niz := make([]*BTreeElement, global)
-	d := make([]*BTreeNode, global)
-	koren := BTreeNode{m, 0, niz, d, nil}
-	return &koren
 }
