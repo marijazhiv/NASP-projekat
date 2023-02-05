@@ -1,4 +1,7 @@
 # Key-Value engine
+
+predmet: Napredni algoritmi i strukture podataka
+
   (grupa 14)
 ## Članovi grupe
 
