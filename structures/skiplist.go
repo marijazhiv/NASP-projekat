@@ -7,26 +7,17 @@ import (
 	"time"
 )
 
-type Node struct {
-	Key       string  //kljuc
-	Value     []byte  //vrednost
-	Next      []*Node //pokazivac na sledeci
-	Timestamp string  //otisak vremena
-	Tombstone bool    //da li je obrisan
-	Checksum  uint32  //pomocna vrednost
-}
-
 type SkipLista struct {
-	maxh int   //maximalna visina
-	hn   *Node //glava skipliste
-	h    int   //trenutna visina
-	c    int   //duzina skipliste
+	maxh int      //maximalna visina
+	hn   *Element //glava skipliste
+	h    int      //trenutna visina
+	c    int      //duzina skipliste
 }
 
 func NewSkipList(maxh int) *SkipLista { //inicijalizacija skip liste
 	bytes := []byte("head")
 	crc := CRC32(bytes)
-	root := Node{"head", nil, make([]*Node, maxh+1), time.Now().String(),
+	root := Element{"head", nil, make([]*Element, maxh+1), time.Now().String(),
 		false, crc}
 	skiplist := SkipLista{maxh, &root, 1, 1}
 	return &skiplist
@@ -43,11 +34,11 @@ func (sl *SkipLista) randomlvl() int { //odredjivanje nivoa node-a bacanjem novc
 	return l
 }
 
-func (sl *SkipLista) Add(key string, value []byte, tombstone bool) *Node {
+func (sl *SkipLista) Add(key string, value []byte, tombstone bool) *Element {
 	level := sl.randomlvl()
 	bytes := []byte(key)
 	crc := CRC32(bytes)
-	node := &Node{key, value, make([]*Node, level+1), time.Now().String(), tombstone, crc} //generisemo node sa vrednostima
+	node := &Element{key, value, make([]*Element, level+1), time.Now().String(), tombstone, crc} //generisemo node sa vrednostima
 	for i := sl.h - 1; i >= 0; i-- {
 		current := sl.hn
 		next := current.Next[i]
@@ -67,7 +58,7 @@ func (sl *SkipLista) Add(key string, value []byte, tombstone bool) *Node {
 	return node
 }
 
-func (sl *SkipLista) Delete(key string) *Node {
+func (sl *SkipLista) Delete(key string) *Element {
 
 	curr := sl.hn
 	for i := sl.h - 1; i >= 0; i-- { //idemo od najviseg ka nizem nivou
@@ -90,7 +81,7 @@ func (sl *SkipLista) Delete(key string) *Node {
 	return nil
 }
 
-func (sl *SkipLista) Find(key string) *Node {
+func (sl *SkipLista) Find(key string) *Element {
 
 	current := sl.hn
 	for i := sl.h - 1; i >= 0; i-- {
