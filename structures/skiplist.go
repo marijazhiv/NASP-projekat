@@ -154,7 +154,7 @@ func (sl *SkipLista) delete(name string) bool {
 	}
 
 	node.tombstone = true
-	node.timestamp = time.Now().Strin()
+	node.timestamp = time.Now().String()
 	// for i := 0; i < len(node.ls); i++ {
 	// 	last[i].ls[i].next = node.ls[i].next
 	// 	node.ls[i].next = nil
