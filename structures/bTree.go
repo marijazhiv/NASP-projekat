@@ -2,6 +2,8 @@ package structures
 
 import "fmt"
 
+// Jelena Adamovic, SV 6/2021
+
 var global = 0
 
 // Element B - stabla
