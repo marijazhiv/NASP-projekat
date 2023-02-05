@@ -20,33 +20,29 @@ func NewMemTable(maxSize, limit uint, maxh int) *MemTable {
 
 // Funkcija AddNew dodaje novi element u MemTable.
 // Kljuc tog novog elementa je string key.
-func (mt *MemTable) AddNew(key string) {
+func (mt *MemTable) AddNew(key string, value []byte, tombstone bool) {
 	mt.size += 1
-	mt.data.add(key)
+	mt.data.Add(key, value, tombstone)
 }
 
 // Funkcija Remove vrsi uklanjanje elementa iz MemTable i radi proveru da li je element obrisan.
 // Ako jeste, vraca true, ako nije - vraca false.
 func (mt *MemTable) Remove(key string) bool {
-	deleted := mt.data.delete(key)
-	if deleted == true {
-		return true
+	deleted := mt.data.Delete(key)
+	if deleted == nil {
+		return false
 	}
-	return false
+	return true
 }
 
 // Funkcija za izmenu elementa MemTable-a.
 // Funkcija zapocinje trazenjem kljuca sa odgovarajucim elementom u MemTable.
 // Ako element ne postoji, pravimo novi.
 // Ako postoji, radimo izmenu.
-func (mt *MemTable) Edit(key string, item string) {
-	_, flag := mt.data.find(key)
-
-	if flag == false {
-		mt.data.add(key)
-	} else {
-		mt.data.delete(key)
-		mt.data.add(item)
+func (mt *MemTable) Edit(key string, value []byte, tombstone bool) {
+	node := mt.data.Find(key)
+	if node == nil {
+		mt.data.Add(key, value, tombstone)
 	}
 
 }
@@ -54,20 +50,20 @@ func (mt *MemTable) Edit(key string, item string) {
 // Funkcija za pretragu elemenata u MemTable po kljucu.
 // Moze nam dati informaciju o tome da li je element pronadjen,
 // da li je obrisan i moze vratiti njegovu vrednost tipa string.
-func (mt *MemTable) Find(key string) (ok, deleted bool, value string) {
-	node, flag := mt.data.find(key)
-	if flag == false {
+func (mt *MemTable) Find(key string) (ok, flag bool, value []byte) {
+	node := mt.data.Find(key)
+	if node == nil {
 		ok = false
-		deleted = false
-		value = ""
-	} else if node.tombstone {
+		flag = false
+		value = nil
+	} else if node.Tombstone {
 		ok = true
-		deleted = true
-		value = ""
+		flag = true
+		value = nil
 	} else {
 		ok = true
-		deleted = false
-		value = node.item
+		flag = false
+		value = node.Value
 	}
 	return
 }
