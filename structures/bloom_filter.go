@@ -1,5 +1,7 @@
 package structures
 
+//Dusica Trbovic, SV 42/2021
+
 import (
 	"encoding/gob"
 	"hash"
