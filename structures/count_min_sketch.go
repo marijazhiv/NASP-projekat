@@ -17,7 +17,7 @@ type CountMinSketch struct {
 	K          uint          // broj redova, tj hash funkcija *ne biraju se nasumicno*
 	E          float64       // procena ucestalosti dogadjaja
 	D          float64       // d = ln (1/delta), tacnost koju celimo da postignemo u pronalazenju ucestalosti
-	set        [][]int       //set koji sadrzi bitove
+	Set        [][]int       //set koji sadrzi bitove
 	hash       []hash.Hash32 // hash
 	time_const uint
 }
@@ -68,7 +68,7 @@ func (count_min_sketch *CountMinSketch) Add_Element_CMS(elem string) {
 	//elem propustamo kroz svaku hash funkciju hi = {1,2...k}
 	for i, hash_func := range count_min_sketch.hash {
 		j := HashIt_CMS(hash_func, elem, count_min_sketch.M) // j = hi(elem) % m
-		count_min_sketch.set[i][j] += 1                      //na preseku reda i kolone vrednost povecavamo za 1
+		count_min_sketch.Set[i][j] += 1                      //na preseku reda i kolone vrednost povecavamo za 1
 	}
 }
 
@@ -77,7 +77,7 @@ func (count_min_sketch *CountMinSketch) Query_CMS(elem string) int {
 	values := make([]int, count_min_sketch.K, count_min_sketch.K) //values je niz, sadrzi sve vrednosti koje dobijemo kada *elem* propustimo kroz sve hash-eve, duzine je k -> *broj hash funkcija*
 	for i, hash_func := range count_min_sketch.hash {             //za svaku hash funkciju
 		j := HashIt_CMS(hash_func, elem, count_min_sketch.M)
-		values[i] = count_min_sketch.set[i][j] //upisujemo vrednost koja se nalazi na toj poziciji u cms-u
+		values[i] = count_min_sketch.Set[i][j] //upisujemo vrednost koja se nalazi na toj poziciji u cms-u
 	}
 	min := values[0]               //vrednost min je prvi clan niza, a zatim primenjujemo algoritam
 	for _, value := range values { //za svaki value
