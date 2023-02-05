@@ -425,23 +425,23 @@ func Find_Files(dir string, level int) ([]string, []string, []string, []string, 
 	var filter_Files []string
 
 	for _, f := range files {
-		if strings.Contains(f.Name(), "lvl"+substr+"-data.db") {
+		if strings.Contains(f.Name(), "lev"+substr+"-Data.db") {
 			data_Files = append(data_Files, f.Name())
 		}
 
-		if strings.Contains(f.Name(), "lvl"+substr+"-index.db") {
+		if strings.Contains(f.Name(), "lev"+substr+"-Index.db") {
 			index_Files = append(index_Files, f.Name())
 		}
 
-		if strings.Contains(f.Name(), "lvl"+substr+"-summary.db") {
+		if strings.Contains(f.Name(), "lev"+substr+"-Summary.db") {
 			summary_Files = append(summary_Files, f.Name())
 		}
 
-		if strings.Contains(f.Name(), "lvl"+substr+"-TOC.txt") {
+		if strings.Contains(f.Name(), "lev"+substr+"-TOC.txt") {
 			TOC_Files = append(TOC_Files, f.Name())
 		}
 
-		if strings.Contains(f.Name(), "lvl"+substr+"-data.db") {
+		if strings.Contains(f.Name(), "lev"+substr+"-Data.db") {
 			filter_Files = append(filter_Files, f.Name())
 		}
 	}
@@ -451,7 +451,7 @@ func Find_Files(dir string, level int) ([]string, []string, []string, []string, 
 func Create_Merkle(level int, newData string, values [][]byte) {
 	files, _ := os.ReadDir("./data/metadata")
 	for _, f := range files {
-		if strings.Contains(f.Name(), "lvl"+strconv.Itoa(level)+"-metadata.txt") {
+		if strings.Contains(f.Name(), "lev"+strconv.Itoa(level)+"-Metadata.txt") {
 			err := os.Remove("./data/metadata" + f.Name())
 			if err != nil {
 				fmt.Println(err)

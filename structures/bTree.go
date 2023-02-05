@@ -4,6 +4,7 @@ import "fmt"
 
 var global = 0
 
+// Element B - stabla
 type BTreeElement struct {
 	key  string
 	item string
@@ -17,6 +18,8 @@ type BTreeNode struct {
 	parent      *BTreeNode
 }
 
+// Pravimo prazno B-stablo
+// ovo stablo ima samo koren
 func CreateBTree(m int64) *BTreeNode {
 	niz := make([]*BTreeElement, global)
 	d := make([]*BTreeNode, global)
@@ -24,6 +27,7 @@ func CreateBTree(m int64) *BTreeNode {
 	return &koren
 }
 
+// Funkcija za sortiranje elemenata u stablu
 func Sort(niz []*BTreeElement) {
 	for i := 0; i < int(len(niz)-1); i++ {
 		for j := i + 1; j < int(len(niz)); j++ {
@@ -56,6 +60,8 @@ func Layout(tree *BTreeNode) []*BTreeElement {
 	}
 	return array
 }
+
+// Funkcija pronalazi najveci cvor koji nije skroz popunjen
 func findTheBiggestHalfFull(node *BTreeNode) *BTreeNode {
 	parent := node.parent
 	if parent == nil {
@@ -66,6 +72,9 @@ func findTheBiggestHalfFull(node *BTreeNode) *BTreeNode {
 	}
 	return findTheBiggestHalfFull(parent)
 }
+
+// Funkcija za uklanjanje elemenata iz B-stabla
+// Radi logicko brisanje (promenu statusnog polja)
 func Wipe(tree *BTreeNode, el *BTreeElement) {
 	node := tree
 	counter := 0
@@ -87,6 +96,8 @@ func Wipe(tree *BTreeNode, el *BTreeElement) {
 		}
 	}
 }
+
+// Funkcija vrsi pretragu u B-stablu
 func Search(tree *BTreeNode, el *BTreeElement) bool {
 	node := tree
 	correct := false
@@ -117,6 +128,8 @@ func Search(tree *BTreeNode, el *BTreeElement) bool {
 	}
 	return correct
 }
+
+// Funkcija vrsi trazenje lista u B-stablu
 func FindLeaf(tree *BTreeNode, el *BTreeElement) *BTreeNode {
 	node := tree
 	for len(node.children) > 0 {
@@ -133,6 +146,8 @@ func FindLeaf(tree *BTreeNode, el *BTreeElement) *BTreeNode {
 	}
 	return node
 }
+
+// Dodavanje novog cvora u B-stablo
 func Insert(tree *BTreeNode, el *BTreeElement) {
 
 	if tree.currentSize == (tree.m-1) && len(tree.children) == 0 {
