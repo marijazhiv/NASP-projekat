@@ -3,171 +3,108 @@ package structures
 //Boris Markov SV/73-2021
 
 import (
-	"hash/fnv"
 	"math/rand"
 	"time"
 )
 
-const (
-	//maxl = 32  //max visina skipliste
-	p = 0.5 //faktor bacanja novcica
-)
-
 type Node struct {
-	v         uint32 //hashirana vrednost node-a
-	item      string //ime node-a
-	tombstone bool   //tombstone elemenat
-	timestamp string //vremenski zapis
-	ls        []*Level
-}
-
-type Level struct {
-	next *Node
+	Key       string  //kljuc
+	Value     []byte  //vrednost
+	Next      []*Node //pokazivac na sledeci
+	Timestamp string  //otisak vremena
+	Tombstone bool    //da li je obrisan
+	Checksum  uint32  //pomocna vrednost
 }
 
 type SkipLista struct {
-	maxl int
-	hn   *Node
-	h    int
-	c    int
+	maxh int   //maximalna visina
+	hn   *Node //glava skipliste
+	h    int   //trenutna visina
+	c    int   //duzina skipliste
 }
 
 func NewSkipList(maxh int) *SkipLista { //inicijalizacija skip liste
-	return &SkipLista{
-		maxl: maxh,
-		hn:   NewNode(maxh, "nil", 0),
-		h:    1,
-		c:    0,
-	}
-}
-
-func NewNode(level int, name string, val uint32) *Node { //inicijalizacija jednog node-a
-	n := new(Node)
-	n.v = val
-	n.item = name
-	n.tombstone = false
-	n.timestamp = time.Now().String()
-	n.ls = make([]*Level, level)
-	for i := 0; i < len(n.ls); i++ {
-		n.ls[i] = new(Level)
-	}
-	return n
-}
-
-func HashSL(s string) uint32 { //funkcija hashiranja stringa u uint32
-	h := fnv.New32a()
-	h.Write([]byte(s))
-	return h.Sum32()
+	bytes := []byte("head")
+	crc := CRC32(bytes)
+	root := Node{"head", nil, make([]*Node, maxh+1), time.Now().String(),
+		false, crc}
+	skiplist := SkipLista{maxh, &root, 1, 1}
+	return &skiplist
 }
 
 func (sl *SkipLista) randomlvl() int { //odredjivanje nivoa node-a bacanjem novcica
-	l := 1
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for r.Float64() < p && l < sl.maxl {
-		l++
+	l := 0
+	for ; rand.Int31n(2) == 1; l++ {
+		if l > sl.h {
+			sl.h = l
+			return l
+		}
 	}
 	return l
 }
 
-func (sl *SkipLista) add(name string) bool {
-
-	value := HashSL(name)
-
-	if value <= 0 {
-		return false
-	}
-
-	update := make([]*Node, sl.maxl)
-	th := sl.hn
-
-	for i := sl.h - 1; i >= 0; i-- { //generisemo mesta gde cemo ubaciti fajl
-		for th.ls[i].next != nil && th.ls[i].next.v < value {
-			th = th.ls[i].next
+func (sl *SkipLista) Add(key string, value []byte, tombstone bool) *Node {
+	level := sl.randomlvl()
+	bytes := []byte(key)
+	crc := CRC32(bytes)
+	node := &Node{key, value, make([]*Node, level+1), time.Now().String(), tombstone, crc} //generisemo node sa vrednostima
+	for i := sl.h - 1; i >= 0; i-- {
+		current := sl.hn
+		next := current.Next[i]
+		for next != nil {
+			if next == nil || next.Key > key { //ako je naisao na nekog sa vecim kljucem, spustamo se nivo
+				break
+			}
+			current = next
+			next = current.Next[i]
 		}
-		if th.ls[i].next != nil && th.ls[i].next.v == value {
-			return false
+		if i <= level { //nije nasao veci? spustamo se nivo
+			sl.c++
+			node.Next[i] = next
+			current.Next[i] = node
 		}
-
-		update[i] = th
 	}
-
-	level := sl.randomlvl() //generisemo nivo do kog ce node skociti
-	node := NewNode(level, name, value)
-	if level > sl.h {
-		sl.h = level
-	}
-
-	for i := 0; i < level; i++ { //na svakom nivou (do generisanog) ga zapisujemo
-		if update[i] == nil {
-			sl.hn.ls[i].next = node
-			continue
-		}
-		node.ls[i].next = update[i].ls[i].next
-		update[i].ls[i].next = node
-	}
-
-	sl.c++
-	return true
+	return node
 }
 
-func (sl *SkipLista) find(name string) (*Node, bool) {
-	value := HashSL(name)
+func (sl *SkipLista) Delete(key string) *Node {
 
-	var node *Node
-	th := sl.hn
-
-	for i := sl.h - 1; i >= 0; i-- {
-		for th.ls[i].next != nil && th.ls[i].next.v <= value {
-			th = th.ls[i].next
-		}
-
-		if th.v == value {
-			node = th
-			break
+	curr := sl.hn
+	for i := sl.h - 1; i >= 0; i-- { //idemo od najviseg ka nizem nivou
+		next := curr.Next[i]
+		for next != nil {
+			curr = next
+			next = curr.Next[i]
+			if next == nil || curr.Key > key {
+				break
+			}
+			if curr.Key == key { //nadjen prepravljamo da bude logicki obrisan (i menjamo timestamp)
+				curr.Tombstone = true
+				curr.Timestamp = time.Now().String()
+				tmp := curr
+				curr = curr.Next[i]
+				return tmp
+			}
 		}
 	}
-	if node == nil {
-		return nil, false
-	}
-
-	return node, true
+	return nil
 }
 
-func (sl *SkipLista) delete(name string) bool {
-	value := HashSL(name)
-	var node *Node
-	last := make([]*Node, sl.h)
-	th := sl.hn
+func (sl *SkipLista) Find(key string) *Node {
 
+	current := sl.hn
 	for i := sl.h - 1; i >= 0; i-- {
-		for th.ls[i].next != nil && th.ls[i].next.v < value {
-			th = th.ls[i].next
-		}
-
-		last[i] = th
-
-		if th.ls[i].next != nil && th.ls[i].next.v == value {
-			node = th.ls[i].next
+		next := current.Next[i]
+		for next != nil {
+			current = next
+			next = current.Next[i]
+			if current.Key == key { //nije nam bitan na kom smo nivou, nasli smo trazeni node
+				return current
+			}
+			if next == nil || current.Key > key {
+				break
+			}
 		}
 	}
-
-	if node == nil {
-		return false
-	}
-
-	node.tombstone = true
-	node.timestamp = time.Now().String()
-	// for i := 0; i < len(node.ls); i++ {
-	// 	last[i].ls[i].next = node.ls[i].next
-	// 	node.ls[i].next = nil
-	// }
-
-	// for i := 0; i < len(sl.hn.ls); i++ {
-	// 	if sl.hn.ls[i].next == nil {
-	// 		sl.h = i
-	// 		break
-	// 	}
-	// }
-	sl.c--
-	return true
+	return nil
 }
