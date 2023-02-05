@@ -86,7 +86,7 @@ func (s *Structures) GET(key string) string {
 		p, value = s.Check_key("hll-" + key)
 		if p == true {
 			hll := DeserializeHLL(value)
-			text = "Podatak pripada Hyper_Log_Log-u sa estimacijom: " + fmt.Sprintf("%f", hll.Count())
+			text = "Podatak pripada Hyper_Log_Log-u sa estimacijom: " + fmt.Sprintf("%d", hll.Count())
 		} else {
 			p, value = s.Check_key("csm-" + key)
 			if p == true {

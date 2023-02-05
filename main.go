@@ -162,13 +162,13 @@ func list_func(choice int, s *structures.Structures) bool {
 }
 
 func main() {
-	structures := new(structures.Structures)
-	structures.Init()
+	s := new(structures.Structures)
+	s.Init()
 
 	p := false
-	choice := 0
+	// var choice int
 	q := true
-	for q == true { 
+	for q == true {
 		for p == false { //ponavlja se sve dok input ne bude validan, *broj i u dobrom opsegu*
 			list_meni()
 			input := bufio.NewScanner(os.Stdin)
@@ -180,6 +180,8 @@ func main() {
 				fmt.Println("Niste uneli broj. Pokusajte ponovo!")
 			} else {
 				if choice >= 1 && choice <= 12 {
+					fmt.Println(choice)
+					q = list_func(choice, s)
 					break
 				} else {
 					fmt.Println("Dozvoljeni opseg operacija u meniju je 1-12! Pokusajte ponovo!")
@@ -188,10 +190,10 @@ func main() {
 
 		}
 
-	//sve dok se ne pozove kraj programa, tj 12
-		fmt.Println(choice)
+		//sve dok se ne pozove kraj programa, tj 12
+		// fmt.Println(choice)
 		//pozivamo funkciju koja izlistava pozive, od 1-12
-		q = list_func(choice, s)
+
 	}
 
 }
