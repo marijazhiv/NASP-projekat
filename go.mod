@@ -1,4 +1,4 @@
-module naisp_projekat
+module NASP-projekat
 
 go 1.19
 
