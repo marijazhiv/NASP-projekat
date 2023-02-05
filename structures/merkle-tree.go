@@ -1,4 +1,5 @@
 package structures
+//Marija Zivanovic, SV19/2021
 
 import (
     "crypto/sha1"
@@ -63,7 +64,7 @@ func CreateMerkleTree(keys [][]byte, path string) *MerkleRoot {
 
     root := MerkleRoot{root_node}
     new_path := strings.Replace(path, "Data.db", "Metadata.txt", 1)
-    new_path = "./kv-system/data/metadata/" + new_path
+    new_path = "data/metadata/" + new_path
     WriteInFile(root_node, new_path)
     return &root
 }
