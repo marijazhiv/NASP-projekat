@@ -31,7 +31,7 @@ func NewTokenBucket(interval int64, maximumTokens int) *TokenBucket {
 // od definisanog intervala, resetujemo broj dozvoljenih zahteva na unapred definisano ogranicenje
 // i definisemo novo vreme resetovanja
 
-func (tb *TokenBucket) validateRequest() bool {
+func (tb *TokenBucket) ValidateRequest() bool {
 	if time.Now().Unix()-tb.lastRefillTimestamp > tb.interval {
 		tb.lastRefillTimestamp = time.Now().Unix()
 		tb.currentTokens = tb.capacity
