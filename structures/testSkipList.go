@@ -3,7 +3,7 @@ package structures
 import "fmt"
 
 func Test() {
-	sl := NewSkipList()
+	sl := NewSkipList(32)
 	sl.add("Boris")
 	sl.add("Marija")
 	sl.add("Igor")

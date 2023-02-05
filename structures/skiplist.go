@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	maxl = 32  //max visina skipliste
-	p    = 0.5 //faktor bacanja novcica
+	//maxl = 32  //max visina skipliste
+	p = 0.5 //faktor bacanja novcica
 )
 
 type Node struct {
@@ -31,9 +31,9 @@ type SkipLista struct {
 	c  int
 }
 
-func NewSkipList() *SkipLista { //inicijalizacija skip liste
+func NewSkipList(maxh int) *SkipLista { //inicijalizacija skip liste
 	return &SkipLista{
-		hn: NewNode(maxl, "nil", 0),
+		hn: NewNode(maxh, "nil", 0),
 		h:  1,
 		c:  0,
 	}

@@ -12,8 +12,8 @@ type MemTable struct {
 // TODO: preuzimanje maksimalne velicine MemTable iz konfiguracionog fajla
 // Funkcija newMemTable pravi novi MemTable uz pomoc skip liste.
 // Border predstavlja granicu do koje mozemo napuniti MemTable pre ubacivanja u SSTable.
-func NewMemTable(maxSize, limit uint) *MemTable {
-	sl := NewSkipList() // pravimo praznu skip listu
+func NewMemTable(maxSize, limit uint, maxh int) *MemTable {
+	sl := NewSkipList(maxh) // pravimo praznu skip listu
 	mt := MemTable{*sl, 0, limit, maxSize}
 	return &mt
 }

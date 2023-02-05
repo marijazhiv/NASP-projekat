@@ -6,7 +6,7 @@ import "fmt"
 
 // test za Memtable
 func MemTableTest() {
-	mt := NewMemTable(3, 3)
+	mt := NewMemTable(3, 3, 32)
 	mt.AddNew("Jelena")
 	mt.AddNew("Marija")
 	mt.AddNew("test")
