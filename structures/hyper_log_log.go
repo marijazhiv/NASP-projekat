@@ -94,7 +94,7 @@ func (hll *hyperLogLog) SerializeHLL() []byte { //serijalizacija HLL u niz bajto
 	return buff.Bytes()
 }
 
-func DeserializeHLL(data []byte) *hyperLogLog { //deserijalizacija
+func DeserializeHLL(data []byte) *hyperLogLog { //deserijalizacija (iz niza byte u tip hyperLogLog)
 	buff := bytes.NewBuffer(data)
 	decoder := gob.NewDecoder(buff)
 	hll := new(hyperLogLog)

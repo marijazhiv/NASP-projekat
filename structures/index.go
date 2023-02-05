@@ -52,7 +52,7 @@ func FindIndex(key string, offset int64, filename string) (ok bool, dataOffset i
 	if err != nil {
 		panic(err)
 	}
-	fileLen := binary.LittleEndian.Uint64(bytes)
+	fileLen := binary.LittleEndian.Uint64(bytes) //duzina fajla? belezimo
 
 	_, err = file.Seek(offset, 0)
 	if err != nil {
@@ -68,7 +68,7 @@ func FindIndex(key string, offset int64, filename string) (ok bool, dataOffset i
 		if err != nil {
 			panic(err)
 		}
-		keyLen := binary.LittleEndian.Uint64(bytes)
+		keyLen := binary.LittleEndian.Uint64(bytes) //transformisemo kljuc u uint64
 
 		bytes = make([]byte, keyLen)
 		_, err = reader.Read(bytes)
@@ -77,13 +77,13 @@ func FindIndex(key string, offset int64, filename string) (ok bool, dataOffset i
 		}
 		nodeKey := string(bytes[:])
 
-		if nodeKey == key {
+		if nodeKey == key { //da li smo nasli kljuc?
 			ok = true
-		} else if nodeKey > key { //izasli smo iz opsega, neuspesna pretraga (niz je sortiran)
+		} else if nodeKey > key { //izasli smo iz opsega, neuspesna pretraga (niz je sortiran!)
 			return false, 0
 		}
 
-		bytes = make([]byte, 8)
+		bytes = make([]byte, 8) //nasli smo ga, uzimamo offset
 		_, err = reader.Read(bytes)
 		if err != nil {
 			panic(err)
@@ -98,7 +98,7 @@ func FindIndex(key string, offset int64, filename string) (ok bool, dataOffset i
 	return
 }
 
-func (index *SSindex) Write() (keys []string, offsets []uint) {
+func (index *SSindex) Write() (keys []string, offsets []uint) { //ispis u fajl
 	currOffset := uint(0)
 	file, err := os.Create(index.filename)
 	if err != nil {

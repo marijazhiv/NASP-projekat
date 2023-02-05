@@ -117,6 +117,6 @@ func Deserialize_CMS(data []byte) *CountMinSketch {
 			break
 		}
 	}
-	count_min_sketch.Hash = Copy_Hash(count_min_sketch.K, count_min_sketch.Time_const)
+	count_min_sketch.Hash = CopyHashFunctions(count_min_sketch.K, count_min_sketch.Time_const)
 	return count_min_sketch //povratna vrednost je count_min_sketch objekat
 }
