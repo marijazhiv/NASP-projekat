@@ -44,12 +44,12 @@ func unos() string {
 
 func list_func(choice int, struc *structures.Structures) bool { //ime promenljive nam se kosi sa imenom paketa
 	if choice == 1 { //put
-		if structures.TOKEN_BUCKET.validateRequest() == true {
+		if struc.TOKEN_BUCKET.ValidateRequest() == true {
 			fmt.Print("Unesite kljuc podatka koji zelite da PUT-ujete -> ")
-			key := scan()
+			key := unos()
 			fmt.Print("Unesite vrednost podatka koji zelite da PUT-ujete -> ")
-			value := scan()
-			if structures.PUT(key, []byte(value), false) == true {
+			value := unos()
+			if struc.PUT(key, []byte(value), false) == true {
 				fmt.Println("PUT je uspesno zavrsen!")
 			} else {
 				fmt.Println("Nije moguce izvrsiti PUT!")
@@ -58,12 +58,12 @@ func list_func(choice int, struc *structures.Structures) bool { //ime promenljiv
 			fmt.Println("Previse zahteva je poslato!")
 		}
 	} else if choice == 2 { //get
-		if structures.TOKEN_BUCKET.validateRequest() == true {
+		if struc.TOKEN_BUCKET.ValidateRequest() == true {
 
 		} else {
 
 		}
-	}  else if choice == 3 { //delete
+	} else if choice == 3 { //delete
 
 	} else if choice == 4 { //list
 
