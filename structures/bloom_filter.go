@@ -1,4 +1,3 @@
-//Dusica Trbovic, SV 42/2021
 package structures
 
 import (
@@ -13,11 +12,11 @@ import (
 
 // Bloom filter moze da nam kaze da li element sigurno nije u skupu, ili je on mozda u skupu
 type BloomFilter struct {
-	M          uint          // velicina set-ova
+	M          uint          // velicina Set-ova
 	K          uint          // broj hash funkcija
-	P          float64       // false-pozitiv (1-[1-1/m]^kn)^k ///// n je pretpostavljen broj elemenata u setu
-	set        []byte        // set koji sadrzi bitove
-	hash       []hash.Hash32 // hash
+	P          float64       // false-pozitiv (1-[1-1/m]^kn)^k ///// n je pretpostavljen broj elemenata u Setu
+	Set        []byte        // Set koji sadrzi bitove
+	Hash       []hash.Hash32 // hash
 	time_const uint
 }
 
@@ -38,14 +37,14 @@ func Create_BloomFilter(n uint, p float64) *BloomFilter {
 
 func Formula_M_BF(n int, p float64) uint {
 	// m = − ( (n * ln(p)) / (ln 2)^2 )
-	// formula za m, gde je n ocekivani broj elemenata u setu, a p je false-positive verovatnoca
+	// formula za m, gde je n ocekivani broj elemenata u Setu, a p je false-positive verovatnoca
 	m := uint(math.Ceil(float64(n) * math.Abs(math.Log(p)) / math.Pow(math.Log(2), float64(2))))
 	return m
 }
 
 func Formula_K_BF(n int, m uint) uint {
 	// k = (m/n)*ln(2)
-	// formula za k, gde je n ockivani broj elemenata u setu, m je velicina bit seta *predhodno izracunata uz Formula_M funkciju*
+	// formula za k, gde je n ockivani broj elemenata u Setu, m je velicina bit Seta *predhodno izracunata uz Formula_M funkciju*
 	k := uint(math.Ceil((float64(m) / float64(n)) * math.Log(2)))
 	return k
 }
@@ -70,17 +69,17 @@ func Copy_Hash(k uint, time uint) []hash.Hash32 {
 }
 
 func (bloom_filter *BloomFilter) Add_Element_BF(elem Element) { //dodavanje kljuca elementa u bloom filter
-	for _, hash_func := range bloom_filter.hash { //za svaku hash funkciju iz bloom_filter-a
-		i := HashIt_BF(hash_func, elem.Key, bloom_filter.M) //izracunavamo indekse u setu koje prebacujemo sa 0 na 1
-		bloom_filter.set[i] = 1                             //kolizija -> *na ovom mestu je vec 1* -> nastavi dalje
+	for _, hash_func := range bloom_filter.Hash { //za svaku hash funkciju iz bloom_filter-a
+		i := HashIt_BF(hash_func, elem.Key, bloom_filter.M) //izracunavamo indekse u Setu koje prebacujemo sa 0 na 1
+		bloom_filter.Set[i] = 1                             //kolizija -> *na ovom mestu je vec 1* -> nastavi dalje
 	}
 }
 
 func (bloom_filter *BloomFilter) Query_BF(elem string) bool {
-	for _, hash_func := range bloom_filter.hash { //za svaku hash funkciju iz bloom_filter-a
-		i := HashIt_BF(hash_func, elem, bloom_filter.M) //izracunavamo indekse u setu radi provere
-		if bloom_filter.set[i] != 1 {                   //ako je vrednost u setu 0
-			return false //element SIGURNO *100%* nije u setu
+	for _, hash_func := range bloom_filter.Hash { //za svaku hash funkciju iz bloom_filter-a
+		i := HashIt_BF(hash_func, elem, bloom_filter.M) //izracunavamo indekse u Setu radi provere
+		if bloom_filter.Set[i] != 1 {                   //ako je vrednost u Setu 0
+			return false //element SIGURNO *100%* nije u Setu
 		}
 	}
 	return true //ako funkcija vrati true, znaci da su na svim pozicijama pronadjene 1, ali to ne garantuje prisutnost elementa *KOLIZIJA*
@@ -92,8 +91,8 @@ func HashIt_BF(hash_func hash.Hash32, elem string, m uint) uint32 {
 		panic(err)
 	}
 	i := hash_func.Sum32() % uint32(m) // i = h(elem) % m
-	hash_func.Reset()                  // resetujemo hash
-	return i                           // vracamo i, tj index seta na kom se nalazi element
+	hash_func.Reset()                  // reSetujemo hash
+	return i                           // vracamo i, tj index Seta na kom se nalazi element
 }
 
 func Write_BloomFilter(filename string, bloom_filter *BloomFilter) {
@@ -134,6 +133,6 @@ func Read_BloomFilter(filename string) (bloom_filter *BloomFilter) {
 			break
 		}
 	}
-	bloom_filter.hash = Copy_Hash(bloom_filter.K, bloom_filter.time_const)
+	bloom_filter.Hash = Copy_Hash(bloom_filter.K, bloom_filter.time_const)
 	return //bloom_filter je uspesno iscitan iz file-a i kreiran
 }
