@@ -43,6 +43,8 @@ func (mt *MemTable) Edit(key string, value []byte, tombstone bool) {
 	node := mt.data.Find(key)
 	if node == nil {
 		mt.data.Add(key, value, tombstone)
+	} else {
+		node.Value = value
 	}
 
 }
@@ -74,7 +76,7 @@ func (mt *MemTable) Size() uint {
 }
 
 // Funkcija proverava da li je MemTable dovoljno popunjen da bi se flush-ovao u SSTable.
-func (mt *MemTable) checkFlush() bool {
+func (mt *MemTable) CheckFlush() bool {
 	if (float64(mt.size)/float64(mt.maxSize))*100 >= float64(mt.limit) {
 		return true
 	}

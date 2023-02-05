@@ -1,9 +1,9 @@
 package main
 
 import (
+	"NASP-projekat/structures"
 	"bufio"
 	"fmt"
-	"NASP-projekat/structures"
 	"os"
 	"strconv"
 )
@@ -28,7 +28,7 @@ func list_meni() {
 }
 
 func check_tocken_bucket(s *structures.Structures) bool {
-	r := s.TOKEN_BUCKET.validateRequest()
+	r := s.TOKEN_BUCKET.ValidateRequest()
 	if r == false {
 		fmt.Println("Previse zahteva je poslato!")
 		return false
@@ -36,7 +36,13 @@ func check_tocken_bucket(s *structures.Structures) bool {
 	return true
 }
 
-func list_func(choice int, structures *structures.Structures) bool {
+func unos() string {
+	input := bufio.NewScanner(os.Stdin)
+	input.Scan()
+	return input.Text()
+}
+
+func list_func(choice int, struc *structures.Structures) bool { //ime promenljive nam se kosi sa imenom paketa
 	if choice == 1 { //put
 		if structures.TOKEN_BUCKET.validateRequest() == true {
 			fmt.Print("Unesite kljuc podatka koji zelite da PUT-ujete -> ")
@@ -70,13 +76,61 @@ func list_func(choice int, structures *structures.Structures) bool {
 	} else if choice == 8 { //query cms
 
 	} else if choice == 9 { //create hll
+		if !check_tocken_bucket(struc) {
+			return true
+		}
 
+		fmt.Println("\nKreiranje HyperLogLog-a")
+		fmt.Print("Kljuc HLL: ")
+		key := "hll-" + unos()
+		val := structures.NewHLL(uint(struc.CONFIG.HLL_Parameters.Precision))
+		hll := val.SerializeHLL()
+		if struc.PUT(key, hll, false) {
+			fmt.Println("HyperLogLog je uspesno kreiran.")
+		}
 	} else if choice == 10 { //add element to hll
+		if !check_tocken_bucket(struc) {
+			return true
+		}
+
+		fmt.Println("\n-Dodajemo na HyperLogLog")
+		fmt.Print("Kljuc HLL: ")
+		key := "hll-" + unos()
+		ok, hll := struc.Check_key(key)
+		if !ok {
+			fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
+		}
+
+		hyperll := structures.DeserializeHLL(hll)
+		fmt.Print(("Vrednost koju dodajemo: "))
+		val := unos()
+		hyperll.Add(val)
+		if struc.EDIT(key, hyperll.SerializeHLL()) {
+			fmt.Println("Uspesno dodat!")
+		} else {
+			fmt.Println("Neuspesno dodat!")
+		}
+		return true
 
 	} else if choice == 11 { //calculate hll
+		if !check_tocken_bucket(struc) {
+			return true
+		}
+
+		fmt.Println("\n-Estimacija HLL")
+		fmt.Print("Kljuc HLL: ")
+		key := "hll-" + unos()
+		ok, hll := struc.Check_key(key)
+		if !ok {
+			fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
+		}
+
+		hyperll := structures.DeserializeHLL(hll)
+		fmt.Println("Estimacija: ", hyperll.Count())
+		return true
 
 	} else if choice == 12 {
-		structures.WAL.Dump()
+		struc.WAL.Dump()
 		fmt.Println("Izlazak iz programa!")
 		return false
 	}

@@ -1,8 +1,8 @@
 package structures
 
 import (
-	"fmt"
 	"NASP-projekat/configurations"
+	"fmt"
 	"time"
 )
 
@@ -41,7 +41,7 @@ func (s *Structures) PUT(key string, value []byte, tombstone bool) bool { //doda
 	s.MEM_TABLE.AddNew(key, value, tombstone)
 	s.CACHE.Add_Node(key, value)
 
-	if s.MEM_TABLE.checkFlush() == true {
+	if s.MEM_TABLE.CheckFlush() == true {
 		s.MEM_TABLE.Flush()
 		s.WAL.RemoveSegments()
 		s.LSM.DoWeNeedCompaction("data/sstable/", 1)
@@ -52,7 +52,7 @@ func (s *Structures) PUT(key string, value []byte, tombstone bool) bool { //doda
 	return true
 }
 
-func (s *Structures) check_key(key string) (bool, []byte) { //dobaljanje elementa uz pomocu njegovog kljuca, gde je povratna vrednost podatak da li je element pronadjen i vrednost elementa
+func (s *Structures) Check_key(key string) (bool, []byte) { //dobaljanje elementa uz pomocu njegovog kljuca, gde je povratna vrednost podatak da li je element pronadjen i vrednost elementa
 	p, delete, value := s.MEM_TABLE.Find(key)
 	if p == true && delete == true { //element je pronadjen ali ima status obrisanog elementa
 		return false, nil
@@ -80,15 +80,15 @@ func (s *Structures) check_key(key string) (bool, []byte) { //dobaljanje element
 
 func (s *Structures) GET(key string) string {
 	var text string
-	p, value := s.check_key(key) //proveravamo da li se element nalazi u memoriji, cache-u ili sstable-u
+	p, value := s.Check_key(key) //proveravamo da li se element nalazi u memoriji, cache-u ili sstable-u
 
 	if p == false { //ako se element ne nalazi u memoriji, cache-u ili sstable-u
-		p, value = s.check_key("hll-" + key)
+		p, value = s.Check_key("hll-" + key)
 		if p == true {
 			hll := DeserializeHLL(value)
 			text = "Podatak pripada Hyper_Log_Log-u sa estimacijom: " + fmt.Sprintf("%f", hll.Count())
 		} else {
-			p, value = s.check_key("csm-" + key)
+			p, value = s.Check_key("csm-" + key)
 			if p == true {
 				text = "Podatak pripada Count_Min_Skatch-u"
 			} else {
@@ -118,13 +118,13 @@ func (s *Structures) DELETE(key string) bool {
 	}
 
 	//ako elemnt nije u mem_table strukturi
-	p, value := s.check_key(key)
+	p, value := s.Check_key(key)
 	if p == false {
 		key_hll := "hll-" + key
-		p, value = s.check_key(key_hll)
+		p, value = s.Check_key(key_hll)
 		if p == false {
 			key_cms := "cms-" + key
-			p, value = s.check_key(key_cms)
+			p, value = s.Check_key(key_cms)
 			if p == false {
 				return false
 			} else {
@@ -137,6 +137,21 @@ func (s *Structures) DELETE(key string) bool {
 
 	s.PUT(key, value, true) //dodajemo podatak o tome da je element obrisan
 	s.CACHE.Delete_Node(key)
+	return true
+}
+
+func (s *Structures) EDIT(key string, value []byte) bool {
+	s.MEM_TABLE.Edit(key, value, false)
+	elem := Element{
+		Key:       key,
+		Value:     value,
+		Next:      nil,
+		Timestamp: time.Now().String(),
+		Tombstone: false,
+		Checksum:  CRC32(value),
+	}
+	s.WAL.Put(&elem)
+	s.CACHE.Add_Node(key, value)
 	return true
 }
 

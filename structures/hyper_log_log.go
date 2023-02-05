@@ -35,9 +35,9 @@ func (h hyperLogLog) Add(data string) hyperLogLog {
 	dummy := convertToUint32(data) //convertujemo string u uint32, da bi imali istu duzinu podataka
 	b := make([]byte, 4)           //ubacujemo ga u 4 bajta
 	binary.LittleEndian.PutUint32(b, dummy)
-	x := createHash32(b)
+	x := CreateHash32(b)
 	k := 32 - h.p                    //prvih b bita (zavisi od preciznosti)
-	r := leftmostActiveBit(x << h.p) //gledamo koliko nula imamo sa kraja
+	r := LeftmostActiveBit(x << h.p) //gledamo koliko nula imamo sa kraja
 	j := x >> uint(k)
 	if r > h.registers[j] { //dodeljujemo broj pojavljivanja nula registru koji je odredjen prvim p bita
 		h.registers[j] = r
@@ -45,7 +45,7 @@ func (h hyperLogLog) Add(data string) hyperLogLog {
 	return h
 }
 
-func (hll *hyperLogLog) emptyCount() int {
+func (hll *hyperLogLog) EmptyCount() int {
 	sum := 0
 	for _, val := range hll.registers {
 		if val == 0 {
@@ -63,7 +63,7 @@ func (h hyperLogLog) Count() uint64 { //racuna evaluaciju HLL
 
 	alpha := 0.7213 / (1.0 + 1.079/float64(h.m))
 	estimation := alpha * math.Pow(float64(h.m), 2.0) / sum
-	emptyRegs := h.emptyCount()
+	emptyRegs := h.EmptyCount()
 	if estimation <= 2.5*float64(h.m) { //do small range correction
 		if emptyRegs > 0 {
 			estimation = float64(h.m) * math.Log(float64(h.m)/float64(emptyRegs))
@@ -75,11 +75,11 @@ func (h hyperLogLog) Count() uint64 { //racuna evaluaciju HLL
 	return uint64(estimation)
 }
 
-func leftmostActiveBit(x uint32) int { //trazi duzinu niza nula sa kraja broja
+func LeftmostActiveBit(x uint32) int { //trazi duzinu niza nula sa kraja broja
 	return 1 + bits.LeadingZeros32(x)
 }
 
-func createHash32(stream []byte) uint32 { //pretvara vrednost u 32bitni hash
+func CreateHash32(stream []byte) uint32 { //pretvara vrednost u 32bitni hash
 	h := fnv.New32()
 	h.Write(stream)
 	sum := h.Sum32()
