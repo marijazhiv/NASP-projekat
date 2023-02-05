@@ -167,30 +167,31 @@ func main() {
 
 	p := false
 	choice := 0
-	for p == false { //ponavlja se sve dok input ne bude validan, *broj i u dobrom opsegu*
-		list_meni()
-		input := bufio.NewScanner(os.Stdin)
-		input.Scan()
+	q := true
+	for q == true { 
+		for p == false { //ponavlja se sve dok input ne bude validan, *broj i u dobrom opsegu*
+			list_meni()
+			input := bufio.NewScanner(os.Stdin)
+			input.Scan()
 
-		choice, err := strconv.Atoi(input.Text())
+			choice, err := strconv.Atoi(input.Text())
 
-		if err != nil {
-			fmt.Println("Niste uneli broj. Pokusajte ponovo!")
-		} else {
-			if choice >= 1 && choice <= 12 {
-				break
+			if err != nil {
+				fmt.Println("Niste uneli broj. Pokusajte ponovo!")
 			} else {
-				fmt.Println("Dozvoljeni opseg operacija u meniju je 1-12! Pokusajte ponovo!")
+				if choice >= 1 && choice <= 12 {
+					break
+				} else {
+					fmt.Println("Dozvoljeni opseg operacija u meniju je 1-12! Pokusajte ponovo!")
+				}
 			}
+
 		}
 
-	}
-
-	q := true
-	for q == true { //sve dok se ne pozove kraj programa, tj 12
+	//sve dok se ne pozove kraj programa, tj 12
 		fmt.Println(choice)
 		//pozivamo funkciju koja izlistava pozive, od 1-12
-		q = list_func(choice, structures)
+		q = list_func(choice, s)
 	}
 
 }
