@@ -10,6 +10,7 @@ import (
 )
 
 func list_meni() {
+	fmt.Println(">----------------TIM14-----------------<")
 	fmt.Println("Meni: ")
 	fmt.Println("1. PUT")
 	fmt.Println("2. GET")
@@ -24,8 +25,8 @@ func list_meni() {
 	fmt.Println("10. Add Element in Hyper_Log_Log")
 	fmt.Println("11. Calculate Hyper_Log_Log")
 	fmt.Println("12. Izlaz iz programa")
-
-	fmt.Println("Izaberite jednu od ponudjenih opcija iz menija -> ")
+	fmt.Println("----------------------------------------")
+	fmt.Print("Izaberite jednu od ponudjenih opcija iz menija -> ")
 }
 
 func list_func(choice int, s *structures.Structures) bool {
@@ -75,12 +76,12 @@ func list_func(choice int, s *structures.Structures) bool {
 			fmt.Println("Previse zahteva je poslato!")
 		}
 	} else if choice == 4 { //list
-
+		fmt.Println("Ova funkcija nije implementirana :(")
 	} else if choice == 5 { //range scan
-
+		fmt.Println("Ova funkcija nije implementirana :(")
 	} else if choice == 6 { //create cms
 		if s.TOKEN_BUCKET.ValidateRequest() == true {
-			fmt.Print("Unesite kljuc podatka koji zelite da dodate i zatim kreirate CMS -> ")
+			fmt.Print("Unesite kljuc koji ce oznacavati CMS -> ")
 			input_key := bufio.NewScanner(os.Stdin)
 			input_key.Scan()
 			key := "cms-" + input_key.Text()
@@ -94,7 +95,7 @@ func list_func(choice int, s *structures.Structures) bool {
 		}
 	} else if choice == 7 { //add element to cms
 		if s.TOKEN_BUCKET.ValidateRequest() == true {
-			fmt.Print("Unesite kljuc podatka koji zelite da dodate u CMS -> ")
+			fmt.Print("Unesite kljuc CMS-a -> ")
 			input_key := bufio.NewScanner(os.Stdin)
 			input_key.Scan()
 			key := "cms-" + input_key.Text()
@@ -120,7 +121,7 @@ func list_func(choice int, s *structures.Structures) bool {
 		}
 	} else if choice == 8 { //query cms
 		if s.TOKEN_BUCKET.ValidateRequest() == true {
-			fmt.Print("Unesite kljuc iz CMS -> ")
+			fmt.Print("Unesite kljuc CMS-a -> ")
 			input_key := bufio.NewScanner(os.Stdin)
 			input_key.Scan()
 			key := "cms-" + input_key.Text()
