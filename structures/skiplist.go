@@ -50,7 +50,7 @@ func NewNode(level int, name string, val uint32) *Node { //inicijalizacija jedno
 	return n
 }
 
-func hash(s string) uint32 { //funkcija hashiranja stringa u uint32
+func HashSL(s string) uint32 { //funkcija hashiranja stringa u uint32
 	h := fnv.New32a()
 	h.Write([]byte(s))
 	return h.Sum32()
@@ -67,7 +67,7 @@ func (sl *SkipLista) randomlvl() int { //odredjivanje nivoa node-a bacanjem novc
 
 func (sl *SkipLista) add(name string) bool {
 
-	value := hash(name)
+	value := HashSL(name)
 
 	if value <= 0 {
 		return false
@@ -107,7 +107,7 @@ func (sl *SkipLista) add(name string) bool {
 }
 
 func (sl *SkipLista) find(name string) (*Node, bool) {
-	value := hash(name)
+	value := HashSL(name)
 
 	var node *Node
 	th := sl.hn
@@ -130,7 +130,7 @@ func (sl *SkipLista) find(name string) (*Node, bool) {
 }
 
 func (sl *SkipLista) delete(name string) bool {
-	value := hash(name)
+	value := HashSL(name)
 	var node *Node
 	last := make([]*Node, sl.h)
 	th := sl.hn

@@ -3,7 +3,9 @@ package structures
 //Boris Markov SV73/2021
 
 import (
+	"bytes"
 	"encoding/binary"
+	"encoding/gob"
 	"hash/fnv"
 	"math"
 	"math/bits"
@@ -33,7 +35,7 @@ func (h hyperLogLog) Add(data string) hyperLogLog {
 	dummy := convertToUint32(data) //convertujemo string u uint32, da bi imali istu duzinu podataka
 	b := make([]byte, 4)           //ubacujemo ga u 4 bajta
 	binary.LittleEndian.PutUint32(b, dummy)
-	x := createHash(b)
+	x := createHash32(b)
 	k := 32 - h.p //prvih b bita (zavisi od preciznosti)
 	r := leftmostActiveBit(x << h.p)
 	j := x >> uint(k)
@@ -77,10 +79,30 @@ func leftmostActiveBit(x uint32) int { //trazi duzinu niza nula sa kraja broja
 	return 1 + bits.LeadingZeros32(x)
 }
 
-func createHash(stream []byte) uint32 { //pretvara vrednost u 32bitni hash
+func createHash32(stream []byte) uint32 { //pretvara vrednost u 32bitni hash
 	h := fnv.New32()
 	h.Write(stream)
 	sum := h.Sum32()
 	h.Reset()
 	return sum
+}
+
+func (hll *hyperLogLog) SerializeHLL() []byte {
+	var buff bytes.Buffer
+	encoder := gob.NewEncoder(&buff)
+	encoder.Encode(&hll)
+	return buff.Bytes()
+}
+
+func DeserializeHLL(data []byte) *hyperLogLog {
+	buff := bytes.NewBuffer(data)
+	decoder := gob.NewDecoder(buff)
+	hll := new(hyperLogLog)
+	for {
+		err := decoder.Decode(&hll)
+		if err != nil {
+			break
+		}
+	}
+	return hll
 }
