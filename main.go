@@ -1,11 +1,12 @@
 package main
 
 import (
-	"NASP-projekat/structures"
 	"bufio"
 	"fmt"
+	"naisp_projekat/structures"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func list_meni() {
@@ -25,21 +26,6 @@ func list_meni() {
 	fmt.Println("12. Izlaz iz programa")
 
 	fmt.Println("Izaberite jednu od ponudjenih opcija iz menija -> ")
-}
-
-func check_tocken_bucket(s *structures.Structures) bool {
-	r := s.TOKEN_BUCKET.ValidateRequest()
-	if r == false {
-		fmt.Println("Previse zahteva je poslato!")
-		return false
-	}
-	return true
-}
-
-func unos() string {
-	input := bufio.NewScanner(os.Stdin)
-	input.Scan()
-	return input.Text()
 }
 
 func list_func(choice int, s *structures.Structures) bool {
@@ -93,65 +79,126 @@ func list_func(choice int, s *structures.Structures) bool {
 	} else if choice == 5 { //range scan
 
 	} else if choice == 6 { //create cms
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
+			fmt.Print("Unesite kljuc podatka koji zelite da dodate i zatim kreirate CMS -> ")
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := "cms-" + input_key.Text()
 
-	} else if choice == 7 { //add element to cms
-
-	} else if choice == 8 { //query cms
-
-	} else if choice == 9 { //create hll
-		if !check_tocken_bucket(s) {
-			return true
+			value := structures.Create_CountMinSketch(0.1, 0.01).Serialize_CMS()
+			if s.PUT(key, value, false) == true {
+				fmt.Println("Count_Min_Sketch je uspesno kreiran!")
+			}
+		} else {
+			fmt.Println("Previse zahteva je poslato!")
 		}
+	} else if choice == 7 { //add element to cms
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
+			fmt.Print("Unesite kljuc podatka koji zelite da dodate u CMS -> ")
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := "cms-" + input_key.Text()
+			p, data := s.Check_key(key)
+			if p == false {
+				fmt.Println("CMS sa kljucem koji ste uneli ne postoji!")
+				return true
+			}
+			cms := structures.Deserialize_CMS(data)
+			fmt.Print("Unesite vrednost podatka koji zelite da dodate u CMS -> ")
+			input_value := bufio.NewScanner(os.Stdin)
+			input_value.Scan()
+			value := input_value.Text()
 
-		fmt.Println("\nKreiranje HyperLogLog-a")
-		fmt.Print("Kljuc HLL: ")
-		key := "hll-" + unos()
-		val := structures.NewHLL(uint(s.CONFIG.HLL_Parameters.Precision))
-		hll := val.SerializeHLL()
-		if s.PUT(key, hll, false) {
-			fmt.Println("HyperLogLog je uspesno kreiran.")
+			cms.Add_Element_CMS(strings.ToUpper(value))
+			if s.EDIT(key, cms.Serialize_CMS()) {
+				fmt.Println("Uspesno dodata vrednost u CMS!")
+			} else {
+				fmt.Println("Trenutno nije moguce uneti vrednost u CMS!")
+			}
+		} else {
+			fmt.Println("Previse zahteva je poslato!")
+		}
+	} else if choice == 8 { //query cms
+		if s.TOKEN_BUCKET.ValidateRequest() == true {
+			fmt.Print("Unesite kljuc iz CMS -> ")
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := "cms-" + input_key.Text()
+			p, data := s.Check_key(key)
+			if p == false {
+				fmt.Println("Nije moguce pronaci podatak sa zadatim kljucem!")
+				return true
+			}
+			fmt.Print("Unesite vrednost za koju radite QUERY -> ")
+			input_value := bufio.NewScanner(os.Stdin)
+			input_value.Scan()
+			value := input_value.Text()
+			cms := structures.Deserialize_CMS(data)
+			fmt.Println(value, " -> ", cms.Query_CMS(strings.ToUpper(value)))
+		} else {
+			fmt.Println("Previse zahteva je poslato!")
+		}
+	} else if choice == 9 { //create hll
+		if s.TOKEN_BUCKET.ValidateRequest() == false {
+			fmt.Println("\nKreiranje HyperLogLog-a")
+			fmt.Print("Kljuc HLL: ")
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := "hll-" + input_key.Text()
+			val := structures.NewHLL(uint(s.CONFIG.HLL_Parameters.Precision))
+			hll := val.SerializeHLL()
+			if s.PUT(key, hll, false) {
+				fmt.Println("HyperLogLog je uspesno kreiran.")
+			}
+		} else {
+			fmt.Println("Previse zahteva je poslato!")
 		}
 	} else if choice == 10 { //add element to hll
-		if !check_tocken_bucket(s) {
+		if s.TOKEN_BUCKET.ValidateRequest() == false {
+			fmt.Println("\n-Dodajemo na HyperLogLog")
+			fmt.Print("Kljuc HLL: ")
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := "hll-" + input_key.Text()
+			ok, hll := s.Check_key(key)
+			if !ok {
+				fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
+			}
+
+			hyperll := structures.DeserializeHLL(hll)
+			fmt.Print(("Vrednost koju dodajemo: "))
+			input_value := bufio.NewScanner(os.Stdin)
+			input_value.Scan()
+			val := input_value.Text()
+			hyperll.Add(val)
+			if s.EDIT(key, hyperll.SerializeHLL()) {
+				fmt.Println("Uspesno dodat!")
+			} else {
+				fmt.Println("Neuspesno dodat!")
+			}
 			return true
-		}
-
-		fmt.Println("\n-Dodajemo na HyperLogLog")
-		fmt.Print("Kljuc HLL: ")
-		key := "hll-" + unos()
-		ok, hll := s.Check_key(key)
-		if !ok {
-			fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
-		}
-
-		hyperll := structures.DeserializeHLL(hll)
-		fmt.Print(("Vrednost koju dodajemo: "))
-		val := unos()
-		hyperll.Add(val)
-		if s.EDIT(key, hyperll.SerializeHLL()) {
-			fmt.Println("Uspesno dodat!")
 		} else {
-			fmt.Println("Neuspesno dodat!")
+			fmt.Println("Previse zahteva je poslato!")
 		}
-		return true
 
 	} else if choice == 11 { //calculate hll
-		if !check_tocken_bucket(s) {
+		if s.TOKEN_BUCKET.ValidateRequest() == false {
+			fmt.Println("\n-Estimacija HLL")
+			fmt.Print("Kljuc HLL: ")
+			input_key := bufio.NewScanner(os.Stdin)
+			input_key.Scan()
+			key := "hll-" + input_key.Text()
+			ok, hll := s.Check_key(key)
+			if !ok {
+				fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
+			}
+
+			hyperll := structures.DeserializeHLL(hll)
+			fmt.Println("Estimacija: ", hyperll.Count())
 			return true
+		} else {
+			fmt.Println("Previse zahteva je poslato!")
 		}
-
-		fmt.Println("\n-Estimacija HLL")
-		fmt.Print("Kljuc HLL: ")
-		key := "hll-" + unos()
-		ok, hll := s.Check_key(key)
-		if !ok {
-			fmt.Println("Nije nadjen HLL sa zadatim kljucem.")
-		}
-
-		hyperll := structures.DeserializeHLL(hll)
-		fmt.Println("Estimacija: ", hyperll.Count())
-		return true
-
 	} else if choice == 12 {
 		s.WAL.Dump()
 		fmt.Println("Izlazak iz programa!")
@@ -166,7 +213,6 @@ func main() {
 	s.Init()
 
 	p := false
-	// var choice int
 	q := true
 	for q == true {
 		for p == false { //ponavlja se sve dok input ne bude validan, *broj i u dobrom opsegu*
@@ -180,7 +226,6 @@ func main() {
 				fmt.Println("Niste uneli broj. Pokusajte ponovo!")
 			} else {
 				if choice >= 1 && choice <= 12 {
-					fmt.Println(choice)
 					q = list_func(choice, s)
 					break
 				} else {
@@ -191,9 +236,7 @@ func main() {
 		}
 
 		//sve dok se ne pozove kraj programa, tj 12
-		// fmt.Println(choice)
 		//pozivamo funkciju koja izlistava pozive, od 1-12
-
 	}
 
 }
