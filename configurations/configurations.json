@@ -1,0 +1,28 @@
+{
+	"write_ahead_log": {
+	  "segment_capacity": -1
+	},
+	"cache": {
+	  "max_data": -1
+	},
+	"log_structured_merge_tree": {
+	  "max_level": -1,
+	  "level_size": -1
+	},
+	"token_bucket": {
+	  "max_tokens": -1,
+	  "interval": -1
+	},
+	"mem_table": {
+	  "skip_list_max_height": -1,
+	  "max_size": -1,
+	  "limit": -1
+	},
+	"hyper_log_log": {
+	  "precision": -1
+	},
+	"count_min_sketch": {
+	  "precision": -1,
+	  "accuracy": -1
+	}
+  }
