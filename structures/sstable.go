@@ -1,4 +1,5 @@
 package structures
+//Marija Zivnovic, SV19/2021
 
 import (
 	"bufio"
