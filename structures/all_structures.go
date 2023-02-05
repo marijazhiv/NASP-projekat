@@ -2,7 +2,7 @@ package structures
 
 import (
 	"fmt"
-	"naisp_projekat/configurations"
+	"NASP-projekat/configurations"
 	"time"
 )
 
