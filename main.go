@@ -38,10 +38,26 @@ func check_tocken_bucket(s *structures.Structures) bool {
 
 func list_func(choice int, structures *structures.Structures) bool {
 	if choice == 1 { //put
-
+		if structures.TOKEN_BUCKET.validateRequest() == true {
+			fmt.Print("Unesite kljuc podatka koji zelite da PUT-ujete -> ")
+			key := scan()
+			fmt.Print("Unesite vrednost podatka koji zelite da PUT-ujete -> ")
+			value := scan()
+			if structures.PUT(key, []byte(value), false) == true {
+				fmt.Println("PUT je uspesno zavrsen!")
+			} else {
+				fmt.Println("Nije moguce izvrsiti PUT!")
+			}
+		} else {
+			fmt.Println("Previse zahteva je poslato!")
+		}
 	} else if choice == 2 { //get
+		if structures.TOKEN_BUCKET.validateRequest() == true {
 
-	} else if choice == 3 { //delete
+		} else {
+
+		}
+	}  else if choice == 3 { //delete
 
 	} else if choice == 4 { //list
 
