@@ -36,10 +36,10 @@ func (h hyperLogLog) Add(data string) hyperLogLog {
 	b := make([]byte, 4)           //ubacujemo ga u 4 bajta
 	binary.LittleEndian.PutUint32(b, dummy)
 	x := createHash32(b)
-	k := 32 - h.p //prvih b bita (zavisi od preciznosti)
-	r := leftmostActiveBit(x << h.p)
+	k := 32 - h.p                    //prvih b bita (zavisi od preciznosti)
+	r := leftmostActiveBit(x << h.p) //gledamo koliko nula imamo sa kraja
 	j := x >> uint(k)
-	if r > h.registers[j] { //dodeljujemo broj nula registru koji je odredjen prvim p bita
+	if r > h.registers[j] { //dodeljujemo broj pojavljivanja nula registru koji je odredjen prvim p bita
 		h.registers[j] = r
 	}
 	return h
@@ -55,7 +55,7 @@ func (hll *hyperLogLog) emptyCount() int {
 	return sum
 }
 
-func (h hyperLogLog) Count() uint64 {
+func (h hyperLogLog) Count() uint64 { //racuna evaluaciju HLL
 	sum := 0.
 	for _, v := range h.registers {
 		sum += math.Pow(math.Pow(2, float64(v)), -1)
@@ -64,11 +64,11 @@ func (h hyperLogLog) Count() uint64 {
 	alpha := 0.7213 / (1.0 + 1.079/float64(h.m))
 	estimation := alpha * math.Pow(float64(h.m), 2.0) / sum
 	emptyRegs := h.emptyCount()
-	if estimation <= 2.5*float64(h.m) { // do small range correction
+	if estimation <= 2.5*float64(h.m) { //do small range correction
 		if emptyRegs > 0 {
 			estimation = float64(h.m) * math.Log(float64(h.m)/float64(emptyRegs))
 		}
-	} else if estimation > 1/30.0*math.Pow(2.0, 32.0) { // do large range correction
+	} else if estimation > 1/30.0*math.Pow(2.0, 32.0) { //do large range correction
 		estimation = -math.Pow(2.0, 32.0) * math.Log(1.0-estimation/math.Pow(2.0, 32.0))
 	}
 
@@ -87,14 +87,14 @@ func createHash32(stream []byte) uint32 { //pretvara vrednost u 32bitni hash
 	return sum
 }
 
-func (hll *hyperLogLog) SerializeHLL() []byte {
+func (hll *hyperLogLog) SerializeHLL() []byte { //serijalizacija HLL u niz bajtova
 	var buff bytes.Buffer
 	encoder := gob.NewEncoder(&buff)
 	encoder.Encode(&hll)
 	return buff.Bytes()
 }
 
-func DeserializeHLL(data []byte) *hyperLogLog {
+func DeserializeHLL(data []byte) *hyperLogLog { //deserijalizacija
 	buff := bytes.NewBuffer(data)
 	decoder := gob.NewDecoder(buff)
 	hll := new(hyperLogLog)

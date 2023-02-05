@@ -17,6 +17,7 @@ type Node struct {
 	v         uint32 //hashirana vrednost node-a
 	item      string //ime node-a
 	tombstone bool   //tombstone elemenat
+	timestamp string //vremenski zapis
 	ls        []*Level
 }
 
@@ -43,6 +44,7 @@ func NewNode(level int, name string, val uint32) *Node { //inicijalizacija jedno
 	n.v = val
 	n.item = name
 	n.tombstone = false
+	n.timestamp = time.Now().String()
 	n.ls = make([]*Level, level)
 	for i := 0; i < len(n.ls); i++ {
 		n.ls[i] = new(Level)
@@ -152,6 +154,7 @@ func (sl *SkipLista) delete(name string) bool {
 	}
 
 	node.tombstone = true
+	node.timestamp = time.Now().Strin()
 	// for i := 0; i < len(node.ls); i++ {
 	// 	last[i].ls[i].next = node.ls[i].next
 	// 	node.ls[i].next = nil
