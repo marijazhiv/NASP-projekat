@@ -12,15 +12,15 @@ import (
 )
 
 type LSM struct {
-	maxLvl  int
-	maxSize int
+	maxLvl  int // maksimalan broj nivoa LSM stabla
+	maxSize int // maksimalna velicina LSM stabla
 }
 
 // Funkcija create_LSM pravi novo prazno LSM stablo.
 func create_LSM(maxL, maxS int) *LSM {
 	return &LSM{
-		maxLvl:  maxL,
-		maxSize: maxS,
+		maxLvl:  maxL, // maksimalan broj nivoa LSM stabla
+		maxSize: maxS, // maksimalna velicina LSM stabla
 	}
 }
 
@@ -28,38 +28,49 @@ func create_LSM(maxL, maxS int) *LSM {
 func mergeFiles(dir, fD_File, fI_File, fS_File, fT_File, fF_File, sD_File, sI_File, sS_File,
 	sT_File, sF_File string, level, numFile int) {
 
-	str_Level := strconv.Itoa(level + 1)
+	str_Level := strconv.Itoa(level + 1) // pretvaramo noivo iz int-a u string
 
+	// general_Filename predstavlja generalni naziv fajla
+	// ima delove koji se menjaju u zavisnosti od prosledjenih vrednosti
 	general_Filename := dir + "userTable-data-ic-" + strconv.Itoa(numFile) + "-lvl" + str_Level + "-"
+
+	// pravimo novi SSTable
 	table := &SSTable{general_Filename, general_Filename + "Data.db",
 		general_Filename + "Index.db", general_Filename + "Summary.db",
 		general_Filename + "Filter.gob"}
 
+	// Kreiramo novi .db fajl
 	new_Data, _ := os.Create(general_Filename + "Data.db")
 
-	current_offset := uint(0)
-	current_offset1 := uint(0)
-	current_offset2 := uint(0)
+	current_offset := uint(0)  // trenutni offset u novom fajlu
+	current_offset1 := uint(0) // trenutni offset u prvom fajlu
+	current_offset2 := uint(0) // trenutni offset u drugom fajlu
 
+	// writer za upis novih podataka u fajl
 	writer := bufio.NewWriter(new_Data)
 
-	bytes_Len := make([]byte, 8)
+	// duzina fajla - na pocetku ce biti 0
+	bytes_Len := make([]byte, 8) // u promenljivu bytes_Len se smesta niz bajtova
 	bytes_written, err := writer.Write(bytes_Len)
 	current_offset += uint(bytes_written)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// otvaranje fajla f_DataFile - prvog fajla
 	f_DataFile, err := os.Open(dir + fD_File)
 	if err != nil {
 		panic(err)
 	}
 
+	// otvaranje s_DataFile - drugog fajla
 	s_DataFile, err := os.Open(dir + fS_File)
 	if err != nil {
 		panic(err)
 	}
 
+	// citanje podataka iz fajla
+	// duzina prvog fajla
 	reader1 := bufio.NewReader(f_DataFile)
 	bytes := make([]byte, 8)
 	_, err = reader1.Read(bytes)
@@ -67,9 +78,12 @@ func mergeFiles(dir, fD_File, fI_File, fS_File, fT_File, fF_File, sD_File, sI_Fi
 		panic(err)
 	}
 
+	// serijalizacija podataka u bajtove
 	fileLength1 := binary.LittleEndian.Uint64(bytes)
 	current_offset1 += 8
 
+	// citanje podataka iz drugog fajla
+	// duzina drugog fajla
 	reader2 := bufio.NewReader(s_DataFile)
 	bytes = make([]byte, 8)
 	_, err = reader2.Read(bytes)
@@ -83,6 +97,7 @@ func mergeFiles(dir, fD_File, fI_File, fS_File, fT_File, fF_File, sD_File, sI_Fi
 	fileLength := Read_And_Write(current_offset, current_offset1, current_offset2, new_Data,
 		f_DataFile, s_DataFile, fileLength1, fileLength2, table, level)
 
+	// upis duzine fajla
 	Size_Of_File(general_Filename+"Data.db", fileLength)
 
 	_ = new_Data.Close()
