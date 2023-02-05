@@ -129,10 +129,10 @@ func (index *SSindex) Write() (keys []string, offsets []uint) { //ispis u fajl
 		key := index.DataKeys[i]
 		offset := index.DataOffset[i]
 
-		if i == 0 || i == (len(index.DataKeys)-1) {
+		if i == 0 || i == (len(index.DataKeys)-1) { //prvi i poslednji
 			rangeKeys = append(rangeKeys, key)
 			rangeOffsets = append(rangeOffsets, currOffset)
-		} else if rand.Intn(100) > 50 {
+		} else if rand.Intn(100) > 50 { //sample kljucevi (pseudo slucajni)
 			sampleKeys = append(sampleKeys, key)
 			sampleOffsets = append(sampleOffsets, currOffset)
 		}
@@ -166,7 +166,7 @@ func (index *SSindex) Write() (keys []string, offsets []uint) { //ispis u fajl
 	if err != nil {
 		return
 	}
-	keys = append(rangeKeys, sampleKeys...)
+	keys = append(rangeKeys, sampleKeys...) //dodajemo u listu
 	offsets = append(rangeOffsets, sampleOffsets...)
 	return
 }
